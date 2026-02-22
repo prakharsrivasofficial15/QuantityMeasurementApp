@@ -3,76 +3,151 @@
 
 QuantityMeasurementApp is a structured, incremental application designed to model, compare, convert, and operate on measurable quantities such as length and weight.
 
-The system evolves through clearly defined use cases, starting with basic equality checks and progressively introducing unit conversion and quantity arithmetic. Each enhancement is implemented within strict scope boundaries to ensure clarity, maintainability, and controlled complexity.
+# QuantityMeasurementApp
 
-## Objectives
+A small utility and test suite for comparing and validating physical-length quantities (feet/inches). It provides equality checks and a foundation for future unit conversions and comparisons.
 
-* Provide accurate comparison between quantities across units
+## Features
+- Feet equality check — compare feet values with clear equality rules.
+- Inches equality check — compare inches values and normalize across units.
+- Extensible NUnit test suite covering expected behaviors.
 
-* Enable mathematically correct unit conversions
+## Prerequisites
+- .NET SDK 6.0 or later
 
-* Support arithmetic operations on quantities
+## Getting Started
+Build the project and run tests:
 
-* Maintain clean, extensible object-oriented design
+```bash
+dotnet build
+dotnet test
+```
 
-* Achieve high test coverage through disciplined development
+## Tech Stack
+- C#
+- .NET
+- NUnit
 
-## Development Methodology
+## Branch Strategy
+- `main` → Production-ready
+- `develop` → Integration branch
+- `feature/*` → Individual features
 
-The project follows a hybrid development model:
+## Contributing
+Contributions welcome — open an issue or submit a pull request with a clear description of changes.
 
-1. High-Level Design (DDT)
+## License
+Add a LICENSE file (for example, MIT) to clarify terms for reuse.
 
-* System architecture and object model are planned upfront
+## Contact
+Open an issue in this repository for questions or suggestions.
 
-* Clear separation of responsibilities
+## Use Case: UC1 – Feet Measurement Equality
 
-* Incremental feature roadmap
+### Overview
+This use case implements equality comparison for measurements expressed in Feet.
 
-2. Test-Driven Development (TDD)
+The system compares two numerical values in feet and determines whether they are equal while handling null checks, type safety, and floating-point precision.
 
-* Tests are written before implementation
+### Features Implemented
+- Value-based equality comparison
+- Proper override of `Equals()` and `GetHashCode()`
+- Null safety handling
+- Type safety enforcement
+- NUnit test coverage
 
-* Code is developed to satisfy failing tests
+### Scope
+- Supports Feet-to-Feet comparison only
+- Does NOT support Inches or cross-unit comparison
+- No unit conversion
 
-* Continuous refactoring ensures clean design
+### Concepts Covered
+- Equality Contract (Reflexive, Symmetric, Transitive)
+- Floating-point comparison using `Double.Compare`
+- Encapsulation
+- NUnit testing best practices
 
-* High confidence through comprehensive test coverage
+### How to Run
+```bash
+dotnet test
+```
 
-This combination ensures both architectural stability and implementation correctness.
+### Notes
+Include this use case in the project's documentation to make the current scope and guarantees explicit to contributors and reviewers.
 
-## Engineering Principles
+---
 
-* Incremental Complexity – Build simple, extend gradually
+# UC2 – Feet and Inches Measurement Equality
 
-* Scope Discipline – Each use case defines clear boundaries
+## Overview
+This use case extends UC1 by introducing Inches measurement equality.
 
-* Isolation of Features – One branch per use case
+Feet and Inches are treated as separate classes. Cross-unit comparison is NOT supported in this use case.
 
-* Maintainability First – Avoid premature abstraction
+## Features Implemented
+- Feet equality comparison
+- Inches equality comparison
+- Null safety and type checking
+- NUnit test coverage for both units
 
-* Full Test Coverage – All code paths validated
+## Scope
+- Feet-to-Feet comparison
+- Inches-to-Inches comparison
+- No cross-unit conversion
+- No abstraction (intentional duplication to demonstrate DRY violation)
 
-## Branching Strategy
+## Concepts Covered
+- Equality Contract
+- Floating-point comparison
+- Type safety
+- DRY violation awareness
+- Unit-level isolation
 
-* main → Stable production-ready code
+## How to Run
+```bash
+dotnet test
+```
 
-* dev → Integration branch
+Include this use case in the README to document the current limitations and testing coverage.
 
-* feature/UC* → Individual use case implementations
+---
 
-Each feature branch represents a single use case and is integrated only after completion.
+# UC3 – Generic Length Class (DRY Refactor)
 
-## Expected Outcomes
+## Overview
+This use case refactors UC1 and UC2 to eliminate duplication by introducing a single generic `Length` class.
 
-By the end of development, the system will:
+A `LengthUnit` enum is used to define supported units, and cross-unit comparison is supported through conversion to a common base unit.
 
-* Accurately compare quantities across units
+## Features Implemented
+- Single `Length` class for all length measurements
+- `LengthUnit` enum (Feet, Inches)
+- Cross-unit equality (1 ft == 12 inches)
+- Conversion to base unit (inches)
+- `IEquatable` implementation
+- Full NUnit test coverage
 
-* Perform reliable unit conversions
+## Scope
+- Supports Feet and Inches
+- Supports cross-unit equality
+- No arithmetic operations
+- No additional unit types beyond Feet and Inches
 
-* Support quantity arithmetic operations
+## Concepts Covered
+- DRY Principle
+- Enum usage in C#
+- Abstraction
+- Encapsulation
+- Cross-unit conversion logic
+- Equality contract
+- SOLID principles
 
-* Maintain a clean and extensible object model
+## Example
+Quantity(1.0, Feet) == Quantity(12.0, Inches) → true
 
-* Demonstrate professional Git workflow and TDD discipline
+## How to Run
+```bash
+dotnet test
+```
+
+Documenting UC3 clarifies the refactor and the supported behaviors for contributors and reviewers.
