@@ -1,0 +1,15 @@
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\bin\Debug\net10.0\QuantityMeasurementApp.exe
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\bin\Debug\net10.0\QuantityMeasurementApp.deps.json
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\bin\Debug\net10.0\QuantityMeasurementApp.runtimeconfig.json
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\bin\Debug\net10.0\QuantityMeasurementApp.dll
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\bin\Debug\net10.0\QuantityMeasurementApp.pdb
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\QuantityMeasurementApp.GeneratedMSBuildEditorConfig.editorconfig
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\QuantityMeasurementApp.AssemblyInfoInputs.cache
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\QuantityMeasurementApp.AssemblyInfo.cs
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\QuantityMeasurementApp.csproj.CoreCompileInputs.cache
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\QuantityMeasurementApp.sourcelink.json
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\QuantityMeasurementApp.dll
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\refint\QuantityMeasurementApp.dll
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\QuantityMeasurementApp.pdb
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\QuantityMeasurementApp.genruntimeconfig.cache
+D:\Project\QuantityMeasurementApp\QuantityMeasurementApp\QuantityMeasurementApp\obj\Debug\net10.0\ref\QuantityMeasurementApp.dll
