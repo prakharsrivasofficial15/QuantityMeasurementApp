@@ -1,12 +1,16 @@
+using QuantityMeasurementApp.Enums;
+
 namespace QuantityMeasurementApp.Models
 {
     public class Quantity
     {
         public double Value { get; }
+        public UnitType Unit { get; }
 
-        public Quantity(double value)
+        public Quantity(double value, UnitType unit)
         {
             Value = value;
+            Unit = unit;
         }
 
         public override bool Equals(object obj)
@@ -19,12 +23,15 @@ namespace QuantityMeasurementApp.Models
 
             Quantity other = (Quantity)obj;
 
+            if (Unit != other.Unit)
+                return false;
+
             return Value.CompareTo(other.Value) == 0;
         }
-        
+
         public override int GetHashCode()
         {
-            return Value.GetHashCode();
+            return HashCode.Combine(Value, Unit);
         }
     }
 }
