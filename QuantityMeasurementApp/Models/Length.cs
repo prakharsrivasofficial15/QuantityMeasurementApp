@@ -15,7 +15,14 @@ namespace QuantityMeasurementApp.Models
 
         private double ConvertToBaseUnit()
         {
-            return value * (double)unit;
+            return unit switch
+            {
+                LengthUnit.FEET => value * 12,
+                LengthUnit.INCHES => value,
+                LengthUnit.YARDS => value * 36,
+                LengthUnit.CENTIMETERS => value * 0.393701,
+                _ => throw new ArgumentException("Invalid unit")
+            };
         }
 
         public bool Compare(Length otherLength)
