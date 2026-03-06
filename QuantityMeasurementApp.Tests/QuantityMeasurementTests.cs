@@ -7,88 +7,78 @@ namespace QuantityMeasurementApp.Tests
     public class QuantityMeasurementTests
     {
         [Test]
-        public void GivenSameFeetValue_WhenCompared_ShouldReturnTrue()
+        public void GivenFeetAndFeet_WhenEqual_ShouldReturnTrue()
         {
-            Quantity value1 = new Quantity(1.0, UnitType.Feet);
-            Quantity value2 = new Quantity(1.0, UnitType.Feet);
+            Length length1 = new Length(1.0, LengthUnit.Feet);
+            Length length2 = new Length(1.0, LengthUnit.Feet);
 
-            bool result = value1.Equals(value2);
+            bool result = length1.Equals(length2);
 
             Assert.That(result, Is.True);
         }
 
         [Test]
-        public void GivenDifferentFeetValue_WhenCompared_ShouldReturnFalse()
+        public void GivenInchesAndInches_WhenEqual_ShouldReturnTrue()
         {
-            Quantity value1 = new Quantity(1.0, UnitType.Feet);
-            Quantity value2 = new Quantity(2.0, UnitType.Feet);
+            Length length1 = new Length(1.0, LengthUnit.Inch);
+            Length length2 = new Length(1.0, LengthUnit.Inch);
 
-            bool result = value1.Equals(value2);
-
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void GivenSameInchValue_WhenCompared_ShouldReturnTrue()
-        {
-            Quantity value1 = new Quantity(1.0, UnitType.Inch);
-            Quantity value2 = new Quantity(1.0, UnitType.Inch);
-
-            bool result = value1.Equals(value2);
+            bool result = length1.Equals(length2);
 
             Assert.That(result, Is.True);
         }
 
         [Test]
-        public void GivenDifferentInchValue_WhenCompared_ShouldReturnFalse()
+        public void GivenFeetAndInches_WhenEquivalent_ShouldReturnTrue()
         {
-            Quantity value1 = new Quantity(1.0, UnitType.Inch);
-            Quantity value2 = new Quantity(2.0, UnitType.Inch);
+            Length length1 = new Length(1.0, LengthUnit.Feet);
+            Length length2 = new Length(12.0, LengthUnit.Inch);
 
-            bool result = value1.Equals(value2);
-
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void GivenFeetAndInch_WhenCompared_ShouldReturnFalse()
-        {
-            Quantity feet = new Quantity(1.0, UnitType.Feet);
-            Quantity inch = new Quantity(1.0, UnitType.Inch);
-
-            bool result = feet.Equals(inch);
-
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void GivenQuantity_WhenComparedWithNull_ShouldReturnFalse()
-        {
-            Quantity value = new Quantity(1.0, UnitType.Feet);
-
-            bool result = value.Equals(null);
-
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void GivenQuantity_WhenComparedWithDifferentType_ShouldReturnFalse()
-        {
-            Quantity value = new Quantity(1.0, UnitType.Feet);
-
-            bool result = value.Equals("1.0");
-
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void GivenQuantity_WhenComparedWithSameReference_ShouldReturnTrue()
-        {
-            Quantity value = new Quantity(1.0, UnitType.Feet);
-
-            bool result = value.Equals(value);
+            bool result = length1.Equals(length2);
 
             Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void GivenFeet_WhenDifferent_ShouldReturnFalse()
+        {
+            Length length1 = new Length(1.0, LengthUnit.Feet);
+            Length length2 = new Length(2.0, LengthUnit.Feet);
+
+            bool result = length1.Equals(length2);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void GivenInches_WhenDifferent_ShouldReturnFalse()
+        {
+            Length length1 = new Length(1.0, LengthUnit.Inch);
+            Length length2 = new Length(2.0, LengthUnit.Inch);
+
+            bool result = length1.Equals(length2);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void GivenSameReference_ShouldReturnTrue()
+        {
+            Length length = new Length(1.0, LengthUnit.Feet);
+
+            bool result = length.Equals(length);
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void GivenNull_ShouldReturnFalse()
+        {
+            Length length = new Length(1.0, LengthUnit.Feet);
+
+            bool result = length.Equals(null);
+
+            Assert.That(result, Is.False);
         }
     }
 }
