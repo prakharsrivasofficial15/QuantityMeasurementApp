@@ -70,5 +70,34 @@ namespace QuantityMeasurementApp.Models
 
             return new Length(convertedValue, targetUnit);
         }
+
+        private double ConvertFromBaseToTargetUnit(double lengthInInches, LengthUnit targetUnit)
+        {
+            double result = targetUnit switch
+            {
+                LengthUnit.FEET => lengthInInches / 12,
+                LengthUnit.INCHES => lengthInInches,
+                LengthUnit.YARDS => lengthInInches / 36,
+                LengthUnit.CENTIMETERS => lengthInInches / 0.393701,
+                _ => throw new ArgumentException("Invalid unit")
+            };
+
+            return Math.Round(result, 2);
+        }
+
+        public Length Add(Length thatLength)
+        {
+            if (thatLength == null)
+                throw new ArgumentException("Length to add cannot be null");
+
+            double base1 = this.ConvertToBaseUnit();
+            double base2 = thatLength.ConvertToBaseUnit();
+
+            double sumBase = base1 + base2;
+
+            double resultValue = ConvertFromBaseToTargetUnit(sumBase, this.unit);
+
+            return new Length(resultValue, this.unit);
+        }
     }
 }

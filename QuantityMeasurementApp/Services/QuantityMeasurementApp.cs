@@ -25,5 +25,10 @@ namespace QuantityMeasurementApp.Services
         {
             return length.ConvertTo(toUnit);
         }
+
+        public static Length DemonstrateLengthAddition(Length length1, Length length2)
+        {
+            return length1.Add(length2);
+        }
     }
 }

@@ -130,5 +130,18 @@ namespace QuantityMeasurementApp.Tests
                     expected),
                 Is.True);
         }
+
+        [Test]
+        public void AddFeetAndInches()
+        {
+            Length length1 = new Length(1.0, LengthUnit.FEET);
+            Length length2 = new Length(12.0, LengthUnit.INCHES);
+
+            Length result = Services.QuantityMeasurementApp.DemonstrateLengthAddition(length1, length2);
+
+            Length expected = new Length(2.0, LengthUnit.FEET);
+
+            Assert.That(result.Equals(expected), Is.True);
+        }
     }
 }
