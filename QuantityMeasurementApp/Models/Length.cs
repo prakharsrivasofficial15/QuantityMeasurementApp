@@ -18,19 +18,10 @@ namespace QuantityMeasurementApp.Models
 
         private double ConvertToBaseUnit()
         {
-            double baseValue = unit switch
-            {
-                LengthUnit.FEET => value * 12,
-                LengthUnit.INCHES => value,
-                LengthUnit.YARDS => value * 36,
-                LengthUnit.CENTIMETERS => value * 0.393701,
-                _ => throw new ArgumentException("Invalid unit")
-            };
-
-            return Math.Round(baseValue, 2);
+            return unit.ConvertToBaseUnit(value);
         }
 
-        public bool Compare(Length other)
+        private bool Compare(Length other)
         {
             return ConvertToBaseUnit() == other.ConvertToBaseUnit();
         }
@@ -56,63 +47,25 @@ namespace QuantityMeasurementApp.Models
         public Length ConvertTo(LengthUnit targetUnit)
         {
             double baseValue = ConvertToBaseUnit();
+            double converted = targetUnit.ConvertFromBaseUnit(baseValue);
 
-            double convertedValue = targetUnit switch
-            {
-                LengthUnit.FEET => baseValue / 12,
-                LengthUnit.INCHES => baseValue,
-                LengthUnit.YARDS => baseValue / 36,
-                LengthUnit.CENTIMETERS => baseValue / 0.393701,
-                _ => throw new ArgumentException("Invalid unit")
-            };
-
-            convertedValue = Math.Round(convertedValue, 2);
-
-            return new Length(convertedValue, targetUnit);
+            return new Length(converted, targetUnit);
         }
 
-        private double ConvertFromBaseToTargetUnit(double lengthInInches, LengthUnit targetUnit)
+        public Length Add(Length other)
         {
-            double result = targetUnit switch
-            {
-                LengthUnit.FEET => lengthInInches / 12,
-                LengthUnit.INCHES => lengthInInches,
-                LengthUnit.YARDS => lengthInInches / 36,
-                LengthUnit.CENTIMETERS => lengthInInches / 0.393701,
-                _ => throw new ArgumentException("Invalid unit")
-            };
+            double sumBase = ConvertToBaseUnit() + other.ConvertToBaseUnit();
+            double result = unit.ConvertFromBaseUnit(sumBase);
 
-            return Math.Round(result, 2);
+            return new Length(result, unit);
         }
 
-        public Length Add(Length thatLength)
+        public Length Add(Length other, LengthUnit targetUnit)
         {
-            if (thatLength == null)
-                throw new ArgumentException("Length to add cannot be null");
+            double sumBase = ConvertToBaseUnit() + other.ConvertToBaseUnit();
+            double result = targetUnit.ConvertFromBaseUnit(sumBase);
 
-            double base1 = this.ConvertToBaseUnit();
-            double base2 = thatLength.ConvertToBaseUnit();
-
-            double sumBase = base1 + base2;
-
-            double resultValue = ConvertFromBaseToTargetUnit(sumBase, this.unit);
-
-            return new Length(resultValue, this.unit);
-        }
-
-        public Length Add(Length length, LengthUnit targetUnit)
-        {
-            if (length == null)
-                throw new ArgumentException("Length to add cannot be null");
-
-            double base1 = this.ConvertToBaseUnit();
-            double base2 = length.ConvertToBaseUnit();
-
-            double sumBase = base1 + base2;
-
-            double resultValue = ConvertFromBaseToTargetUnit(sumBase, targetUnit);
-
-            return new Length(resultValue, targetUnit);
+            return new Length(result, targetUnit);
         }
     }
 }
