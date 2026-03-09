@@ -112,5 +112,20 @@ namespace QuantityMeasurementApp.Services
         {
             return q1.Add(q2, targetUnit);
         }
+
+        public static Quantity<U> DemonstrateSubtraction<U>(Quantity<U> q1, Quantity<U> q2)
+        {
+            return q1.Subtract(q2);
+        }
+
+        public static Quantity<U> DemonstrateSubtraction<U>(Quantity<U> q1, Quantity<U> q2, U targetUnit)
+        {
+            return q1.Subtract(q2, targetUnit);
+        }
+
+        public static double DemonstrateDivision<U>(Quantity<U> q1, Quantity<U> q2)
+        {
+            return q1.Divide(q2);
+        }
     }
 }

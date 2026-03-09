@@ -337,5 +337,49 @@ namespace QuantityMeasurementApp.Tests
             Assert.That(result.GetValue(), Is.EqualTo(2000));
             Assert.That(result.GetUnit(), Is.EqualTo(VolumeUnit.MILLILITRE));
         }
+
+        [Test]
+        public void SubtractFeetAndInches()
+        {
+            var f = new Quantity<LengthUnit>(10, LengthUnit.FEET);
+            var i = new Quantity<LengthUnit>(6, LengthUnit.INCHES);
+
+            var result = f.Subtract(i);
+
+            Assert.That(result.GetValue(), Is.EqualTo(9.5));
+        }
+
+        [Test]
+        public void SubtractLitres()
+        {
+            var v1 = new Quantity<VolumeUnit>(5, VolumeUnit.LITRE);
+            var v2 = new Quantity<VolumeUnit>(2, VolumeUnit.LITRE);
+
+            var result = v1.Subtract(v2);
+
+            Assert.That(result.GetValue(), Is.EqualTo(3));
+        }
+
+        [Test]
+        public void DivideFeet()
+        {
+            var q1 = new Quantity<LengthUnit>(10, LengthUnit.FEET);
+            var q2 = new Quantity<LengthUnit>(2, LengthUnit.FEET);
+
+            var result = q1.Divide(q2);
+
+            Assert.That(result, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void DivideDifferentUnits()
+        {
+            var q1 = new Quantity<LengthUnit>(24, LengthUnit.INCHES);
+            var q2 = new Quantity<LengthUnit>(2, LengthUnit.FEET);
+
+            var result = q1.Divide(q2);
+
+            Assert.That(result, Is.EqualTo(1));
+        }
     }
 }
