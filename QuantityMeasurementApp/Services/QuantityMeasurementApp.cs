@@ -1,5 +1,6 @@
 using QuantityMeasurementApp.Models;
 using QuantityMeasurementApp.Enums;
+using QuantityMeasurementApp.Interfaces;
 
 namespace QuantityMeasurementApp.Services
 {
@@ -86,6 +87,32 @@ namespace QuantityMeasurementApp.Services
             WeightUnit targetUnit)
         {
             return w1.Add(w2, targetUnit);
+        }
+
+        public static bool DemonstrateEquality<U>(Quantity<U> q1, Quantity<U> q2)
+            where U : IMeasurable
+        {
+            return q1.Equals(q2);
+        }
+
+        public static Quantity<U> DemonstrateConversion<U>(Quantity<U> quantity, U targetUnit)
+            where U : IMeasurable
+        {
+            double result = quantity.ConvertTo(targetUnit);
+
+            return new Quantity<U>(result, targetUnit);
+        }
+
+        public static Quantity<U> DemonstrateAddition<U>(Quantity<U> q1, Quantity<U> q2)
+            where U : IMeasurable
+        {
+            return q1.Add(q2);
+        }
+
+        public static Quantity<U> DemonstrateAddition<U>(Quantity<U> q1, Quantity<U> q2, U targetUnit)
+            where U : IMeasurable
+        {
+            return q1.Add(q2, targetUnit);
         }
     }
 }

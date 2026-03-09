@@ -1,3 +1,5 @@
+using QuantityMeasurementApp.Interfaces;
+
 namespace QuantityMeasurementApp.Enums
 {
     public enum LengthUnit
@@ -10,32 +12,31 @@ namespace QuantityMeasurementApp.Enums
 
     public static class LengthUnitExtensions
     {
-        public static double ConvertToBaseUnit(this LengthUnit unit, double value)
+        public static double GetConversionFactor(this LengthUnit unit)
         {
-            double result = unit switch
+            return unit switch
             {
-                LengthUnit.FEET => value,
-                LengthUnit.INCHES => value / 12,
-                LengthUnit.YARDS => value * 3,
-                LengthUnit.CENTIMETERS => value / 30.48,
+                LengthUnit.FEET => 12.0,
+                LengthUnit.INCHES => 1.0,
+                LengthUnit.YARDS => 36.0,
+                LengthUnit.CENTIMETERS => 0.393701,
                 _ => throw new ArgumentException("Invalid unit")
             };
+        }
 
-            return Math.Round(result, 2);
+        public static double ConvertToBaseUnit(this LengthUnit unit, double value)
+        {
+            return Math.Round(value * unit.GetConversionFactor(), 2);
         }
 
         public static double ConvertFromBaseUnit(this LengthUnit unit, double baseValue)
         {
-            double result = unit switch
-            {
-                LengthUnit.FEET => baseValue,
-                LengthUnit.INCHES => baseValue * 12,
-                LengthUnit.YARDS => baseValue / 3,
-                LengthUnit.CENTIMETERS => baseValue * 30.48,
-                _ => throw new ArgumentException("Invalid unit")
-            };
+            return Math.Round(baseValue / unit.GetConversionFactor(), 2);
+        }
 
-            return Math.Round(result, 2);
+        public static string GetUnitName(this LengthUnit unit)
+        {
+            return unit.ToString();
         }
     }
 }

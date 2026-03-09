@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿﻿using NUnit.Framework;
 using QuantityMeasurementApp.Models;
 using QuantityMeasurementApp.Enums;
 using QuantityMeasurementApp.Services;
@@ -205,7 +205,7 @@ namespace QuantityMeasurementApp.Tests
             var w1 = new Weight(1, WeightUnit.KILOGRAM);
             var w2 = new Weight(1, WeightUnit.POUND);
 
-            Assert.That(w1.Equals(w2), Is.True);
+            Assert.That(w1.Equals(w2), Is.False);
         }
 
         // UC9 — Addition Tests
@@ -253,6 +253,15 @@ namespace QuantityMeasurementApp.Tests
             var result = w.ConvertTo(WeightUnit.KILOGRAM);
 
             Assert.That(result.GetValue(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void UC10_GivenFeetAndInches_WhenEquivalent_ShouldReturnTrue()
+        {
+            var feet = new Quantity<LengthUnit>(1, LengthUnit.FEET);
+            var inches = new Quantity<LengthUnit>(12, LengthUnit.INCHES);
+
+            Assert.That(feet.Equals(inches), Is.True);
         }
     }
 }
