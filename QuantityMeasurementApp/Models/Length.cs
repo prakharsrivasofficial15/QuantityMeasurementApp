@@ -99,5 +99,20 @@ namespace QuantityMeasurementApp.Models
 
             return new Length(resultValue, this.unit);
         }
+
+        public Length Add(Length length, LengthUnit targetUnit)
+        {
+            if (length == null)
+                throw new ArgumentException("Length to add cannot be null");
+
+            double base1 = this.ConvertToBaseUnit();
+            double base2 = length.ConvertToBaseUnit();
+
+            double sumBase = base1 + base2;
+
+            double resultValue = ConvertFromBaseToTargetUnit(sumBase, targetUnit);
+
+            return new Length(resultValue, targetUnit);
+        }
     }
 }
