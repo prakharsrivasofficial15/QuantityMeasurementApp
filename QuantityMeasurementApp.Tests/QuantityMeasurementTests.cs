@@ -160,5 +160,99 @@ namespace QuantityMeasurementApp.Tests
 
             Assert.That(result.Equals(expected), Is.True);
         }
+
+        // UC9 — Weight Equality Tests
+
+        [Test]
+        public void KilogramEqualsKilogram()
+        {
+            var w1 = new Weight(1, WeightUnit.KILOGRAM);
+            var w2 = new Weight(1, WeightUnit.KILOGRAM);
+
+            Assert.That(w1.Equals(w2), Is.True);
+        }
+
+        [Test]
+        public void KilogramEquals1000Grams()
+        {
+            var w1 = new Weight(1, WeightUnit.KILOGRAM);
+            var w2 = new Weight(1000, WeightUnit.GRAM);
+
+            Assert.That(w1.Equals(w2), Is.True);
+        }
+
+        [Test]
+        public void PoundEquals453Point592Grams()
+        {
+            var w1 = new Weight(1, WeightUnit.POUND);
+            var w2 = new Weight(453.592, WeightUnit.GRAM);
+
+            Assert.That(w1.Equals(w2), Is.True);
+        }
+
+        [Test]
+        public void TonneEquals1000000Grams()
+        {
+            var w1 = new Weight(1, WeightUnit.TONNE);
+            var w2 = new Weight(1000000, WeightUnit.GRAM);
+
+            Assert.That(w1.Equals(w2), Is.True);
+        }
+
+        [Test]
+        public void KilogramNotEqualToPound()
+        {
+            var w1 = new Weight(1, WeightUnit.KILOGRAM);
+            var w2 = new Weight(1, WeightUnit.POUND);
+
+            Assert.That(w1.Equals(w2), Is.True);
+        }
+
+        // UC9 — Addition Tests
+
+        [Test]
+        public void AdditionOfWeightsEqualsExpected()
+        {
+            var w1 = new Weight(1, WeightUnit.KILOGRAM);
+            var w2 = new Weight(1000, WeightUnit.GRAM);
+
+            var result = w1.Add(w2);
+
+            Assert.That(result.Equals(new Weight(2, WeightUnit.KILOGRAM)), Is.True);
+        }
+
+        [Test]
+        public void AdditionWithTargetUnit()
+        {
+            var w1 = new Weight(1, WeightUnit.KILOGRAM);
+            var w2 = new Weight(1, WeightUnit.KILOGRAM);
+
+            var result = w1.Add(w2, WeightUnit.GRAM);
+
+            Assert.That(result.GetValue(), Is.EqualTo(2000));
+            Assert.That(result.GetUnit(), Is.EqualTo(WeightUnit.GRAM));
+        }
+
+        // UC9 — Conversion Tests
+
+        [Test]
+        public void ConvertKilogramToGram()
+        {
+            var w = new Weight(1, WeightUnit.KILOGRAM);
+
+            var result = w.ConvertTo(WeightUnit.GRAM);
+
+            Assert.That(result.GetValue(), Is.EqualTo(1000));
+        }
+
+        [Test]
+        public void ConvertPoundToKilogram()
+        {
+            var w = new Weight(2.20462, WeightUnit.POUND);
+
+            var result = w.ConvertTo(WeightUnit.KILOGRAM);
+
+            Assert.That(result.GetValue(), Is.EqualTo(1));
+        }
     }
 }
