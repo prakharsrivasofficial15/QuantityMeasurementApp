@@ -98,9 +98,7 @@ namespace QuantityMeasurementApp.Services
         public static Quantity<U> DemonstrateConversion<U>(Quantity<U> quantity, U targetUnit)
             where U : IMeasurable
         {
-            double result = quantity.ConvertTo(targetUnit);
-
-            return new Quantity<U>(result, targetUnit);
+            return quantity.ConvertTo(targetUnit);
         }
 
         public static Quantity<U> DemonstrateAddition<U>(Quantity<U> q1, Quantity<U> q2)

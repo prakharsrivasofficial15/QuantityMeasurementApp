@@ -263,5 +263,79 @@ namespace QuantityMeasurementApp.Tests
 
             Assert.That(feet.Equals(inches), Is.True);
         }
+
+        // =======================
+        // UC11 – Volume Tests
+        // =======================
+
+        [Test]
+        public void LitreEqualsLitre()
+        {
+            var v1 = new Quantity<VolumeUnit>(1, VolumeUnit.LITRE);
+            var v2 = new Quantity<VolumeUnit>(1, VolumeUnit.LITRE);
+
+            Assert.That(v1.Equals(v2), Is.True);
+        }
+
+        [Test]
+        public void LitreEqualsMillilitre()
+        {
+            var v1 = new Quantity<VolumeUnit>(1, VolumeUnit.LITRE);
+            var v2 = new Quantity<VolumeUnit>(1000, VolumeUnit.MILLILITRE);
+
+            Assert.That(v1.Equals(v2), Is.True);
+        }
+
+        [Test]
+        public void GallonEquals3Point78541Litres()
+        {
+            var v1 = new Quantity<VolumeUnit>(1, VolumeUnit.GALLON);
+            var v2 = new Quantity<VolumeUnit>(3.78541, VolumeUnit.LITRE);
+
+            Assert.That(v1.Equals(v2), Is.True);
+        }
+
+        [Test]
+        public void ConvertLitreToMillilitre()
+        {
+            var volume = new Quantity<VolumeUnit>(1, VolumeUnit.LITRE);
+
+            var result = volume.ConvertTo(VolumeUnit.MILLILITRE);
+
+            Assert.That(result.GetValue(), Is.EqualTo(1000));
+        }
+
+        [Test]
+        public void ConvertGallonToLitre()
+        {
+            var volume = new Quantity<VolumeUnit>(1, VolumeUnit.GALLON);
+
+            var result = volume.ConvertTo(VolumeUnit.LITRE);
+
+            Assert.That(result.GetValue(), Is.EqualTo(3.78541));
+        }
+
+        [Test]
+        public void AddLitreAndMillilitre()
+        {
+            var v1 = new Quantity<VolumeUnit>(1, VolumeUnit.LITRE);
+            var v2 = new Quantity<VolumeUnit>(1000, VolumeUnit.MILLILITRE);
+
+            var result = v1.Add(v2);
+
+            Assert.That(result.GetValue(), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void AddWithTargetUnitMillilitre()
+        {
+            var v1 = new Quantity<VolumeUnit>(1, VolumeUnit.LITRE);
+            var v2 = new Quantity<VolumeUnit>(1, VolumeUnit.LITRE);
+
+            var result = v1.Add(v2, VolumeUnit.MILLILITRE);
+
+            Assert.That(result.GetValue(), Is.EqualTo(2000));
+            Assert.That(result.GetUnit(), Is.EqualTo(VolumeUnit.MILLILITRE));
+        }
     }
 }

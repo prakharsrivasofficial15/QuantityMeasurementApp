@@ -1,5 +1,7 @@
 using QuantityMeasurementApp.Enums;
 using QuantityMeasurementApp.Interfaces;
+using QuantityMeasurementApp.Services;
+using QuantityMeasurementApp.Extensions;
 
 namespace QuantityMeasurementApp.Models
 {
@@ -38,10 +40,13 @@ namespace QuantityMeasurementApp.Models
             if (unit is WeightUnit wu)
                 return wu.ConvertToBaseUnit(value);
 
+            if (unit is VolumeUnit vu)
+                return vu.ConvertToBaseUnit(value);
+
             throw new ArgumentException("Unsupported unit type");
         }
 
-        public double ConvertTo(U targetUnit)
+        public Quantity<U> ConvertTo(U targetUnit)
         {
             double baseValue;
 
@@ -49,43 +54,81 @@ namespace QuantityMeasurementApp.Models
                 baseValue = lu.ConvertToBaseUnit(value);
             else if (unit is WeightUnit wu)
                 baseValue = wu.ConvertToBaseUnit(value);
+            else if (unit is VolumeUnit vu)
+                baseValue = vu.ConvertToBaseUnit(value);
             else
                 throw new ArgumentException("Unsupported unit type");
 
+            double converted;
+
             if (targetUnit is LengthUnit tlu)
-                return tlu.ConvertFromBaseUnit(baseValue);
+                converted = tlu.ConvertFromBaseUnit(baseValue);
+            else if (targetUnit is WeightUnit twu)
+                converted = twu.ConvertFromBaseUnit(baseValue);
+            else if (targetUnit is VolumeUnit tvu)
+                converted = tvu.ConvertFromBaseUnit(baseValue);
+            else
+                throw new ArgumentException("Unsupported unit type");
 
-            if (targetUnit is WeightUnit twu)
-                return twu.ConvertFromBaseUnit(baseValue);
-
-            throw new ArgumentException("Unsupported unit type");
+            return new Quantity<U>(Math.Round(converted, 5), targetUnit);
         }
 
         public Quantity<U> Add(Quantity<U> other)
         {
-            dynamic source = unit;
+            double base1 = ConvertToBase();
+            double base2;
 
-            double base1 = source.ConvertToBaseUnit(value);
-            double base2 = source.ConvertToBaseUnit(other.value);
+            if (other.unit is LengthUnit lu)
+                base2 = lu.ConvertToBaseUnit(other.value);
+            else if (other.unit is WeightUnit wu)
+                base2 = wu.ConvertToBaseUnit(other.value);
+            else if (other.unit is VolumeUnit vu)
+                base2 = vu.ConvertToBaseUnit(other.value);
+            else
+                throw new ArgumentException("Unsupported unit type");
 
             double sum = base1 + base2;
 
-            double result = source.ConvertFromBaseUnit(sum);
+            double result;
+
+            if (unit is LengthUnit tlu)
+                result = tlu.ConvertFromBaseUnit(sum);
+            else if (unit is WeightUnit twu)
+                result = twu.ConvertFromBaseUnit(sum);
+            else if (unit is VolumeUnit tvu)
+                result = tvu.ConvertFromBaseUnit(sum);
+            else
+                throw new ArgumentException("Unsupported unit type");
 
             return new Quantity<U>(result, unit);
         }
 
         public Quantity<U> Add(Quantity<U> other, U targetUnit)
         {
-            dynamic source = unit;
-            dynamic target = targetUnit;
+            double base1 = ConvertToBase();
+            double base2;
 
-            double base1 = source.ConvertToBaseUnit(value);
-            double base2 = source.ConvertToBaseUnit(other.value);
+            if (other.unit is LengthUnit lu)
+                base2 = lu.ConvertToBaseUnit(other.value);
+            else if (other.unit is WeightUnit wu)
+                base2 = wu.ConvertToBaseUnit(other.value);
+            else if (other.unit is VolumeUnit vu)
+                base2 = vu.ConvertToBaseUnit(other.value);
+            else
+                throw new ArgumentException("Unsupported unit type");
 
             double sum = base1 + base2;
 
-            double result = target.ConvertFromBaseUnit(sum);
+            double result;
+
+            if (targetUnit is LengthUnit tlu)
+                result = tlu.ConvertFromBaseUnit(sum);
+            else if (targetUnit is WeightUnit twu)
+                result = twu.ConvertFromBaseUnit(sum);
+            else if (targetUnit is VolumeUnit tvu)
+                result = tvu.ConvertFromBaseUnit(sum);
+            else
+                throw new ArgumentException("Unsupported unit type");
 
             return new Quantity<U>(result, targetUnit);
         }
@@ -103,6 +146,8 @@ namespace QuantityMeasurementApp.Models
                 base2 = lu.ConvertToBaseUnit(other.value);
             else if (other.unit is WeightUnit wu)
                 base2 = wu.ConvertToBaseUnit(other.value);
+            else if (other.unit is VolumeUnit vu)
+                base2 = vu.ConvertToBaseUnit(other.value);
             else
                 throw new ArgumentException("Unsupported unit type");
 
