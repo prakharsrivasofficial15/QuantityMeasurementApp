@@ -9,13 +9,16 @@ namespace QuantityMeasurementApp.Models
 
         public Length(double value, LengthUnit unit)
         {
+            if (double.IsNaN(value) || double.IsInfinity(value))
+                throw new ArgumentException("Invalid numeric value");
+
             this.value = value;
             this.unit = unit;
         }
 
         private double ConvertToBaseUnit()
         {
-            return unit switch
+            double baseValue = unit switch
             {
                 LengthUnit.FEET => value * 12,
                 LengthUnit.INCHES => value,
@@ -23,11 +26,13 @@ namespace QuantityMeasurementApp.Models
                 LengthUnit.CENTIMETERS => value * 0.393701,
                 _ => throw new ArgumentException("Invalid unit")
             };
+
+            return Math.Round(baseValue, 2);
         }
 
-        public bool Compare(Length otherLength)
+        public bool Compare(Length other)
         {
-            return ConvertToBaseUnit() == otherLength.ConvertToBaseUnit();
+            return ConvertToBaseUnit() == other.ConvertToBaseUnit();
         }
 
         public override bool Equals(object obj)
@@ -46,6 +51,24 @@ namespace QuantityMeasurementApp.Models
         public override int GetHashCode()
         {
             return ConvertToBaseUnit().GetHashCode();
+        }
+
+        public Length ConvertTo(LengthUnit targetUnit)
+        {
+            double baseValue = ConvertToBaseUnit();
+
+            double convertedValue = targetUnit switch
+            {
+                LengthUnit.FEET => baseValue / 12,
+                LengthUnit.INCHES => baseValue,
+                LengthUnit.YARDS => baseValue / 36,
+                LengthUnit.CENTIMETERS => baseValue / 0.393701,
+                _ => throw new ArgumentException("Invalid unit")
+            };
+
+            convertedValue = Math.Round(convertedValue, 2);
+
+            return new Length(convertedValue, targetUnit);
         }
     }
 }

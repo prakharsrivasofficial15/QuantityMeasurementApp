@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using QuantityMeasurementApp.Models;
 using QuantityMeasurementApp.Enums;
+using QuantityMeasurementApp.Services;
 
 namespace QuantityMeasurementApp.Tests
 {
@@ -110,6 +111,24 @@ namespace QuantityMeasurementApp.Tests
             Length feet = new Length(1.0, LengthUnit.FEET);
 
             Assert.That(cm.Equals(feet), Is.False);
+        }
+
+        [Test]
+        public void ConvertFeetToInches()
+        {
+            Length lengthInInches =
+                Services.QuantityMeasurementApp.DemonstrateLengthConversion(
+                    3.0,
+                    LengthUnit.FEET,
+                    LengthUnit.INCHES);
+
+            Length expected = new Length(36.0, LengthUnit.INCHES);
+
+            Assert.That(
+                Services.QuantityMeasurementApp.DemonstrateLengthEquality(
+                    lengthInInches,
+                    expected),
+                Is.True);
         }
     }
 }
