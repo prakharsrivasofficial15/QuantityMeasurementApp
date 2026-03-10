@@ -381,5 +381,179 @@ namespace QuantityMeasurementApp.Tests
 
             Assert.That(result, Is.EqualTo(1));
         }
+
+        // -------------------------
+        // Equality Tests
+        // -------------------------
+
+        [Test]
+        public void CelsiusEqualsCelsius()
+        {
+            var t1 = new Quantity<TemperatureUnit>(0, TemperatureUnit.CELSIUS);
+            var t2 = new Quantity<TemperatureUnit>(0, TemperatureUnit.CELSIUS);
+
+            Assert.That(t1.Equals(t2), Is.True);
+        }
+
+        [Test]
+        public void FahrenheitEqualsFahrenheit()
+        {
+            var t1 = new Quantity<TemperatureUnit>(32, TemperatureUnit.FAHRENHEIT);
+            var t2 = new Quantity<TemperatureUnit>(32, TemperatureUnit.FAHRENHEIT);
+
+            Assert.That(t1.Equals(t2), Is.True);
+        }
+
+        [Test]
+        public void ZeroCelsiusEqualsThirtyTwoFahrenheit()
+        {
+            var celsius = new Quantity<TemperatureUnit>(0, TemperatureUnit.CELSIUS);
+            var fahrenheit = new Quantity<TemperatureUnit>(32, TemperatureUnit.FAHRENHEIT);
+
+            Assert.That(celsius.Equals(fahrenheit), Is.True);
+        }
+
+        [Test]
+        public void HundredCelsiusEqualsTwoHundredTwelveFahrenheit()
+        {
+            var celsius = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var fahrenheit = new Quantity<TemperatureUnit>(212, TemperatureUnit.FAHRENHEIT);
+
+            Assert.That(celsius.Equals(fahrenheit), Is.True);
+        }
+
+        [Test]
+        public void NegativeFortyCelsiusEqualsNegativeFortyFahrenheit()
+        {
+            var celsius = new Quantity<TemperatureUnit>(-40, TemperatureUnit.CELSIUS);
+            var fahrenheit = new Quantity<TemperatureUnit>(-40, TemperatureUnit.FAHRENHEIT);
+
+            Assert.That(celsius.Equals(fahrenheit), Is.True);
+        }
+
+        // -------------------------
+        // Conversion Tests
+        // -------------------------
+
+        [Test]
+        public void ConvertCelsiusToFahrenheit()
+        {
+            var celsius = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+
+            var result = celsius.ConvertTo(TemperatureUnit.FAHRENHEIT);
+
+            Assert.That(result.GetValue(), Is.EqualTo(212));
+        }
+
+        [Test]
+        public void ConvertFahrenheitToCelsius()
+        {
+            var fahrenheit = new Quantity<TemperatureUnit>(32, TemperatureUnit.FAHRENHEIT);
+
+            var result = fahrenheit.ConvertTo(TemperatureUnit.CELSIUS);
+
+            Assert.That(result.GetValue(), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ConvertNegativeTemperature()
+        {
+            var celsius = new Quantity<TemperatureUnit>(-40, TemperatureUnit.CELSIUS);
+
+            var result = celsius.ConvertTo(TemperatureUnit.FAHRENHEIT);
+
+            Assert.That(result.GetValue(), Is.EqualTo(-40));
+        }
+
+        // -------------------------
+        // Unsupported Operations
+        // -------------------------
+
+        [Test]
+        public void TemperatureAdditionShouldThrowException()
+        {
+            var t1 = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var t2 = new Quantity<TemperatureUnit>(50, TemperatureUnit.CELSIUS);
+
+            Assert.Throws<NotSupportedException>(() => t1.Add(t2));
+        }
+
+        [Test]
+        public void TemperatureSubtractionShouldThrowException()
+        {
+            var t1 = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var t2 = new Quantity<TemperatureUnit>(50, TemperatureUnit.CELSIUS);
+
+            Assert.Throws<NotSupportedException>(() => t1.Subtract(t2));
+        }
+
+        [Test]
+        public void TemperatureDivisionShouldThrowException()
+        {
+            var t1 = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var t2 = new Quantity<TemperatureUnit>(50, TemperatureUnit.CELSIUS);
+
+            Assert.Throws<NotSupportedException>(() => t1.Divide(t2));
+        }
+
+        // -------------------------
+        // Cross Category Safety
+        // -------------------------
+
+        [Test]
+        public void TemperatureNotEqualToLength()
+        {
+            var temp = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var length = new Quantity<LengthUnit>(100, LengthUnit.FEET);
+
+            Assert.That(temp.Equals(length), Is.False);
+        }
+
+        [Test]
+        public void TemperatureNotEqualToWeight()
+        {
+            var temp = new Quantity<TemperatureUnit>(50, TemperatureUnit.CELSIUS);
+            var weight = new Quantity<WeightUnit>(50, WeightUnit.KILOGRAM);
+
+            Assert.That(temp.Equals(weight), Is.False);
+        }
+
+        [Test]
+        public void TemperatureNotEqualToVolume()
+        {
+            var temp = new Quantity<TemperatureUnit>(25, TemperatureUnit.CELSIUS);
+            var volume = new Quantity<VolumeUnit>(25, VolumeUnit.LITRE);
+
+            Assert.That(temp.Equals(volume), Is.False);
+        }
+
+        // -------------------------
+        // Edge Case Tests
+        // -------------------------
+
+        [Test]
+        public void SameReferenceTemperature()
+        {
+            var temp = new Quantity<TemperatureUnit>(25, TemperatureUnit.CELSIUS);
+
+            Assert.That(temp.Equals(temp), Is.True);
+        }
+
+        [Test]
+        public void NullComparisonReturnsFalse()
+        {
+            var temp = new Quantity<TemperatureUnit>(25, TemperatureUnit.CELSIUS);
+
+            Assert.That(temp.Equals(null), Is.False);
+        }
+
+        [Test]
+        public void DifferentTemperaturesNotEqual()
+        {
+            var t1 = new Quantity<TemperatureUnit>(50, TemperatureUnit.CELSIUS);
+            var t2 = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+
+            Assert.That(t1.Equals(t2), Is.False);
+        }
     }
 }

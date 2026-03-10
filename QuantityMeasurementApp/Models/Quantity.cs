@@ -49,6 +49,9 @@ namespace QuantityMeasurementApp.Models
 
             if (unit is VolumeUnit vu)
                 return vu.ConvertToBaseUnit(value);
+            
+            if (unit is TemperatureUnit tu)
+                return tu.ConvertToBaseUnit(value);
 
             throw new ArgumentException("Unsupported unit type");
         }
@@ -63,6 +66,8 @@ namespace QuantityMeasurementApp.Models
                 baseValue = wu.ConvertToBaseUnit(value);
             else if (unit is VolumeUnit vu)
                 baseValue = vu.ConvertToBaseUnit(value);
+            else if (unit is TemperatureUnit tu)
+                baseValue = tu.ConvertToBaseUnit(value);
             else
                 throw new ArgumentException("Unsupported unit type");
 
@@ -74,6 +79,8 @@ namespace QuantityMeasurementApp.Models
                 converted = twu.ConvertFromBaseUnit(baseValue);
             else if (targetUnit is VolumeUnit tvu)
                 converted = tvu.ConvertFromBaseUnit(baseValue);
+            else if (targetUnit is TemperatureUnit ttu)
+                converted = ttu.ConvertFromBaseUnit(baseValue);
             else
                 throw new ArgumentException("Unsupported unit type");
 
@@ -115,7 +122,27 @@ namespace QuantityMeasurementApp.Models
             return PerformArithmetic(other, default, ArithmeticOperation.Divide);
         }
 
-        public override bool Equals(object obj)
+        // public override bool Equals(object? obj)
+        // {
+        //     if (obj is not Quantity<U> other)
+        //         return false;
+
+        //     double base1 = ConvertToBase();
+
+        //     double base2;
+
+        //     if (other.unit is LengthUnit lu)
+        //         base2 = lu.ConvertToBaseUnit(other.value);
+        //     else if (other.unit is WeightUnit wu)
+        //         base2 = wu.ConvertToBaseUnit(other.value);
+        //     else if (other.unit is VolumeUnit vu)
+        //         base2 = vu.ConvertToBaseUnit(other.value);
+        //     else
+        //         throw new ArgumentException("Unsupported unit type");
+
+        //     return Math.Round(base1, 2) == Math.Round(base2, 2);
+        // }
+        public override bool Equals(object? obj)
         {
             if (obj is not Quantity<U> other)
                 return false;
@@ -130,6 +157,8 @@ namespace QuantityMeasurementApp.Models
                 base2 = wu.ConvertToBaseUnit(other.value);
             else if (other.unit is VolumeUnit vu)
                 base2 = vu.ConvertToBaseUnit(other.value);
+            else if (other.unit is TemperatureUnit tu)
+                base2 = tu.ConvertToBaseUnit(other.value);
             else
                 throw new ArgumentException("Unsupported unit type");
 
