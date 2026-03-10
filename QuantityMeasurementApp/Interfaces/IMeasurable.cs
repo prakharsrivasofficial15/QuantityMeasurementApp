@@ -2,16 +2,6 @@ namespace QuantityMeasurementApp.Interfaces
 {
     public delegate bool SupportsArithmetic();
 
-    // public interface IMeasurable
-    // {
-    //     double GetConversionFactor();
-
-    //     double ConvertToBaseUnit(double value);
-
-    //     double ConvertFromBaseUnit(double baseValue);
-
-    //     string GetUnitName();
-    // }
     public interface IMeasurable
     {
         string GetUnitName();
