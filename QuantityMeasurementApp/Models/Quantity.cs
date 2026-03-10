@@ -152,41 +152,95 @@ namespace QuantityMeasurementApp.Models
                 throw new ArgumentException("Target unit cannot be null");
         }
 
+        // private double PerformArithmetic(Quantity<U> other, U targetUnit, ArithmeticOperation operation)
+        // {
+        //     double base1 = ConvertToBase();
+        //     double base2;
+
+        //     if (other.unit is LengthUnit lu)
+        //         base2 = lu.ConvertToBaseUnit(other.value);
+        //     else if (other.unit is WeightUnit wu)
+        //         base2 = wu.ConvertToBaseUnit(other.value);
+        //     else if (other.unit is VolumeUnit vu)
+        //         base2 = vu.ConvertToBaseUnit(other.value);
+        //     else
+        //         throw new ArgumentException("Unsupported unit type");
+
+        //     double result = operation switch
+        //     {
+        //         ArithmeticOperation.Add => base1 + base2,
+        //         ArithmeticOperation.Subtract => base1 - base2,
+        //         ArithmeticOperation.Divide => base1 / base2,
+        //         _ => throw new ArgumentException("Unsupported operation")
+        //     };
+
+        //     if (operation == ArithmeticOperation.Divide)
+        //         return result;
+
+        //     double converted;
+
+        //     if (targetUnit is LengthUnit tlu)
+        //         converted = tlu.ConvertFromBaseUnit(result);
+        //     else if (targetUnit is WeightUnit twu)
+        //         converted = twu.ConvertFromBaseUnit(result);
+        //     else if (targetUnit is VolumeUnit tvu)
+        //         converted = tvu.ConvertFromBaseUnit(result);
+        //     else
+        //         throw new ArgumentException("Unsupported unit type");
+
+        //     return Math.Round(converted, 5);
+        // }
+
+        private static double ConvertToBaseValue(object unit, double value)
+        {
+            return unit switch
+            {
+                LengthUnit lu => lu.ConvertToBaseUnit(value),
+                WeightUnit wu => wu.ConvertToBaseUnit(value),
+                VolumeUnit vu => vu.ConvertToBaseUnit(value),
+                TemperatureUnit tu => tu.ConvertToBaseUnit(value),
+                _ => throw new ArgumentException("Unsupported unit type")
+            };
+        }
+
+        private static double ConvertFromBaseValue(object unit, double value)
+        {
+            return unit switch
+            {
+                LengthUnit lu => lu.ConvertFromBaseUnit(value),
+                WeightUnit wu => wu.ConvertFromBaseUnit(value),
+                VolumeUnit vu => vu.ConvertFromBaseUnit(value),
+                TemperatureUnit tu => tu.ConvertFromBaseUnit(value),
+                _ => throw new ArgumentException("Unsupported unit type")
+            };
+        }
+
+        private static void ValidateOperation(object unit, ArithmeticOperation operation)
+        {
+            if (unit is TemperatureUnit tu)
+                tu.ValidateOperationSupport(operation.ToString());
+        }
         private double PerformArithmetic(Quantity<U> other, U targetUnit, ArithmeticOperation operation)
         {
-            double base1 = ConvertToBase();
-            double base2;
+            ValidateOperation(unit, operation);
 
-            if (other.unit is LengthUnit lu)
-                base2 = lu.ConvertToBaseUnit(other.value);
-            else if (other.unit is WeightUnit wu)
-                base2 = wu.ConvertToBaseUnit(other.value);
-            else if (other.unit is VolumeUnit vu)
-                base2 = vu.ConvertToBaseUnit(other.value);
-            else
-                throw new ArgumentException("Unsupported unit type");
+            double base1 = ConvertToBaseValue(unit, value);
+            double base2 = ConvertToBaseValue(other.unit, other.value);
 
             double result = operation switch
             {
                 ArithmeticOperation.Add => base1 + base2,
                 ArithmeticOperation.Subtract => base1 - base2,
-                ArithmeticOperation.Divide => base1 / base2,
-                _ => throw new ArgumentException("Unsupported operation")
+                ArithmeticOperation.Divide => base2 == 0
+                    ? throw new DivideByZeroException()
+                    : base1 / base2,
+                _ => throw new InvalidOperationException()
             };
 
             if (operation == ArithmeticOperation.Divide)
                 return result;
 
-            double converted;
-
-            if (targetUnit is LengthUnit tlu)
-                converted = tlu.ConvertFromBaseUnit(result);
-            else if (targetUnit is WeightUnit twu)
-                converted = twu.ConvertFromBaseUnit(result);
-            else if (targetUnit is VolumeUnit tvu)
-                converted = tvu.ConvertFromBaseUnit(result);
-            else
-                throw new ArgumentException("Unsupported unit type");
+            double converted = ConvertFromBaseValue(targetUnit, result);
 
             return Math.Round(converted, 5);
         }
