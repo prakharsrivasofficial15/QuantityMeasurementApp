@@ -1,4 +1,4 @@
-namespace QuantityMeasurementApp.Enums
+namespace ModelLayer.Enums
 {
     public enum VolumeUnit
     {

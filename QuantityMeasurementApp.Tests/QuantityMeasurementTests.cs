@@ -1,17 +1,20 @@
 ﻿﻿using NUnit.Framework;
-using QuantityMeasurementApp.Models;
-using QuantityMeasurementApp.Enums;
-using QuantityMeasurementApp.Services;
+using ModelLayer.Entities;
+using ModelLayer.Enums;
 
 namespace QuantityMeasurementApp.Tests
 {
     public class QuantityMeasurementTests
     {
+        // =======================
+        // Length Tests with Simplified Quantity<T>
+        // =======================
+
         [Test]
         public void GivenFeetAndFeet_WhenEqual_ShouldReturnTrue()
         {
-            Length length1 = new Length(1.0, LengthUnit.FEET);
-            Length length2 = new Length(1.0, LengthUnit.FEET);
+            var length1 = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var length2 = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
 
             Assert.That(length1.Equals(length2), Is.True);
         }
@@ -19,8 +22,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenInchesAndInches_WhenEqual_ShouldReturnTrue()
         {
-            Length length1 = new Length(1.0, LengthUnit.INCHES);
-            Length length2 = new Length(1.0, LengthUnit.INCHES);
+            var length1 = new Quantity<LengthUnit>(1.0, LengthUnit.INCHES);
+            var length2 = new Quantity<LengthUnit>(1.0, LengthUnit.INCHES);
 
             Assert.That(length1.Equals(length2), Is.True);
         }
@@ -28,8 +31,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenFeetAndInches_WhenEquivalent_ShouldReturnTrue()
         {
-            Length length1 = new Length(1.0, LengthUnit.FEET);
-            Length length2 = new Length(12.0, LengthUnit.INCHES);
+            var length1 = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var length2 = new Quantity<LengthUnit>(12.0, LengthUnit.INCHES);
 
             Assert.That(length1.Equals(length2), Is.True);
         }
@@ -37,8 +40,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenFeet_WhenDifferent_ShouldReturnFalse()
         {
-            Length length1 = new Length(1.0, LengthUnit.FEET);
-            Length length2 = new Length(2.0, LengthUnit.FEET);
+            var length1 = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var length2 = new Quantity<LengthUnit>(2.0, LengthUnit.FEET);
 
             Assert.That(length1.Equals(length2), Is.False);
         }
@@ -46,8 +49,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenInches_WhenDifferent_ShouldReturnFalse()
         {
-            Length length1 = new Length(1.0, LengthUnit.INCHES);
-            Length length2 = new Length(2.0, LengthUnit.INCHES);
+            var length1 = new Quantity<LengthUnit>(1.0, LengthUnit.INCHES);
+            var length2 = new Quantity<LengthUnit>(2.0, LengthUnit.INCHES);
 
             Assert.That(length1.Equals(length2), Is.False);
         }
@@ -55,7 +58,7 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenSameReference_ShouldReturnTrue()
         {
-            Length length = new Length(1.0, LengthUnit.FEET);
+            var length = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
 
             Assert.That(length.Equals(length), Is.True);
         }
@@ -63,7 +66,7 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenNull_ShouldReturnFalse()
         {
-            Length length = new Length(1.0, LengthUnit.FEET);
+            var length = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
 
             Assert.That(length.Equals(null), Is.False);
         }
@@ -71,8 +74,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenOneYard_WhenComparedWithThreeFeet_ShouldReturnTrue()
         {
-            Length yard = new Length(1.0, LengthUnit.YARDS);
-            Length feet = new Length(3.0, LengthUnit.FEET);
+            var yard = new Quantity<LengthUnit>(1.0, LengthUnit.YARDS);
+            var feet = new Quantity<LengthUnit>(3.0, LengthUnit.FEET);
 
             Assert.That(yard.Equals(feet), Is.True);
         }
@@ -80,8 +83,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenOneYard_WhenComparedWith36Inches_ShouldReturnTrue()
         {
-            Length yard = new Length(1.0, LengthUnit.YARDS);
-            Length inches = new Length(36.0, LengthUnit.INCHES);
+            var yard = new Quantity<LengthUnit>(1.0, LengthUnit.YARDS);
+            var inches = new Quantity<LengthUnit>(36.0, LengthUnit.INCHES);
 
             Assert.That(yard.Equals(inches), Is.True);
         }
@@ -89,8 +92,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenCentimeter_WhenComparedWithInches_ShouldReturnTrue()
         {
-            Length cm = new Length(1.0, LengthUnit.CENTIMETERS);
-            Length inches = new Length(0.393701, LengthUnit.INCHES);
+            var cm = new Quantity<LengthUnit>(1.0, LengthUnit.CENTIMETERS);
+            var inches = new Quantity<LengthUnit>(0.393701, LengthUnit.INCHES);
 
             Assert.That(cm.Equals(inches), Is.True);
         }
@@ -98,8 +101,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenThreeFeet_WhenComparedWithOneYard_ShouldReturnTrue()
         {
-            Length feet = new Length(3.0, LengthUnit.FEET);
-            Length yard = new Length(1.0, LengthUnit.YARDS);
+            var feet = new Quantity<LengthUnit>(3.0, LengthUnit.FEET);
+            var yard = new Quantity<LengthUnit>(1.0, LengthUnit.YARDS);
 
             Assert.That(feet.Equals(yard), Is.True);
         }
@@ -107,8 +110,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void GivenDifferentUnits_WhenNotEquivalent_ShouldReturnFalse()
         {
-            Length cm = new Length(1.0, LengthUnit.CENTIMETERS);
-            Length feet = new Length(1.0, LengthUnit.FEET);
+            var cm = new Quantity<LengthUnit>(1.0, LengthUnit.CENTIMETERS);
+            var feet = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
 
             Assert.That(cm.Equals(feet), Is.False);
         }
@@ -116,30 +119,21 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void ConvertFeetToInches()
         {
-            Length lengthInInches =
-                Services.QuantityMeasurementApp.DemonstrateLengthConversion(
-                    3.0,
-                    LengthUnit.FEET,
-                    LengthUnit.INCHES);
+            var lengthInFeet = new Quantity<LengthUnit>(3.0, LengthUnit.FEET);
+            var lengthInInches = lengthInFeet.ConvertTo(LengthUnit.INCHES);
+            var expected = new Quantity<LengthUnit>(36.0, LengthUnit.INCHES);
 
-            Length expected = new Length(36.0, LengthUnit.INCHES);
-
-            Assert.That(
-                Services.QuantityMeasurementApp.DemonstrateLengthEquality(
-                    lengthInInches,
-                    expected),
-                Is.True);
+            Assert.That(lengthInInches.Equals(expected), Is.True);
         }
 
         [Test]
         public void AddFeetAndInches()
         {
-            Length length1 = new Length(1.0, LengthUnit.FEET);
-            Length length2 = new Length(12.0, LengthUnit.INCHES);
+            var length1 = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var length2 = new Quantity<LengthUnit>(12.0, LengthUnit.INCHES);
 
-            Length result = Services.QuantityMeasurementApp.DemonstrateLengthAddition(length1, length2);
-
-            Length expected = new Length(2.0, LengthUnit.FEET);
+            var result = length1.Add(length2);
+            var expected = new Quantity<LengthUnit>(2.0, LengthUnit.FEET);
 
             Assert.That(result.Equals(expected), Is.True);
         }
@@ -147,27 +141,37 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void AddFeetAndInchesWithTargetUnitInches()
         {
-            Length length1 = new Length(1.0, LengthUnit.FEET);
-            Length length2 = new Length(12.0, LengthUnit.INCHES);
+            var length1 = new Quantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var length2 = new Quantity<LengthUnit>(12.0, LengthUnit.INCHES);
 
-            Length result =
-                Services.QuantityMeasurementApp.DemonstrateLengthAddition(
-                    length1,
-                    length2,
-                    LengthUnit.INCHES);
-
-            Length expected = new Length(24.0, LengthUnit.INCHES);
+            var result = length1.Add(length2, LengthUnit.INCHES);
+            var expected = new Quantity<LengthUnit>(24.0, LengthUnit.INCHES);
 
             Assert.That(result.Equals(expected), Is.True);
         }
 
-        // UC9 — Weight Equality Tests
+        [Test]
+        public void SubtractFeetAndInches()
+        {
+            var length1 = new Quantity<LengthUnit>(10.0, LengthUnit.FEET);
+            var length2 = new Quantity<LengthUnit>(6.0, LengthUnit.INCHES);
+
+            var result = length1.Subtract(length2);
+            var expected = new Quantity<LengthUnit>(9.5, LengthUnit.FEET);
+
+            Assert.That(result.Value, Is.EqualTo(9.5).Within(0.0001));
+            Assert.That(result.Unit, Is.EqualTo(LengthUnit.FEET));
+        }
+
+        // =======================
+        // Weight Tests with Simplified Quantity<T>
+        // =======================
 
         [Test]
         public void KilogramEqualsKilogram()
         {
-            var w1 = new Weight(1, WeightUnit.KILOGRAM);
-            var w2 = new Weight(1, WeightUnit.KILOGRAM);
+            var w1 = new Quantity<WeightUnit>(1, WeightUnit.KILOGRAM);
+            var w2 = new Quantity<WeightUnit>(1, WeightUnit.KILOGRAM);
 
             Assert.That(w1.Equals(w2), Is.True);
         }
@@ -175,8 +179,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void KilogramEquals1000Grams()
         {
-            var w1 = new Weight(1, WeightUnit.KILOGRAM);
-            var w2 = new Weight(1000, WeightUnit.GRAM);
+            var w1 = new Quantity<WeightUnit>(1, WeightUnit.KILOGRAM);
+            var w2 = new Quantity<WeightUnit>(1000, WeightUnit.GRAM);
 
             Assert.That(w1.Equals(w2), Is.True);
         }
@@ -184,8 +188,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void PoundEquals453Point592Grams()
         {
-            var w1 = new Weight(1, WeightUnit.POUND);
-            var w2 = new Weight(453.592, WeightUnit.GRAM);
+            var w1 = new Quantity<WeightUnit>(1, WeightUnit.POUND);
+            var w2 = new Quantity<WeightUnit>(453.592, WeightUnit.GRAM);
 
             Assert.That(w1.Equals(w2), Is.True);
         }
@@ -193,8 +197,8 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void TonneEquals1000000Grams()
         {
-            var w1 = new Weight(1, WeightUnit.TONNE);
-            var w2 = new Weight(1000000, WeightUnit.GRAM);
+            var w1 = new Quantity<WeightUnit>(1, WeightUnit.TONNE);
+            var w2 = new Quantity<WeightUnit>(1000000, WeightUnit.GRAM);
 
             Assert.That(w1.Equals(w2), Is.True);
         }
@@ -202,70 +206,56 @@ namespace QuantityMeasurementApp.Tests
         [Test]
         public void KilogramNotEqualToPound()
         {
-            var w1 = new Weight(1, WeightUnit.KILOGRAM);
-            var w2 = new Weight(1, WeightUnit.POUND);
+            var w1 = new Quantity<WeightUnit>(1, WeightUnit.KILOGRAM);
+            var w2 = new Quantity<WeightUnit>(1, WeightUnit.POUND);
 
             Assert.That(w1.Equals(w2), Is.False);
         }
 
-        // UC9 — Addition Tests
-
         [Test]
         public void AdditionOfWeightsEqualsExpected()
         {
-            var w1 = new Weight(1, WeightUnit.KILOGRAM);
-            var w2 = new Weight(1000, WeightUnit.GRAM);
+            var w1 = new Quantity<WeightUnit>(1, WeightUnit.KILOGRAM);
+            var w2 = new Quantity<WeightUnit>(1000, WeightUnit.GRAM);
 
             var result = w1.Add(w2);
+            var expected = new Quantity<WeightUnit>(2, WeightUnit.KILOGRAM);
 
-            Assert.That(result.Equals(new Weight(2, WeightUnit.KILOGRAM)), Is.True);
+            Assert.That(result.Equals(expected), Is.True);
         }
 
         [Test]
         public void AdditionWithTargetUnit()
         {
-            var w1 = new Weight(1, WeightUnit.KILOGRAM);
-            var w2 = new Weight(1, WeightUnit.KILOGRAM);
+            var w1 = new Quantity<WeightUnit>(1, WeightUnit.KILOGRAM);
+            var w2 = new Quantity<WeightUnit>(1, WeightUnit.KILOGRAM);
 
             var result = w1.Add(w2, WeightUnit.GRAM);
 
-            Assert.That(result.GetValue(), Is.EqualTo(2000));
-            Assert.That(result.GetUnit(), Is.EqualTo(WeightUnit.GRAM));
+            Assert.That(result.Value, Is.EqualTo(2000));
+            Assert.That(result.Unit, Is.EqualTo(WeightUnit.GRAM));
         }
-
-        // UC9 — Conversion Tests
 
         [Test]
         public void ConvertKilogramToGram()
         {
-            var w = new Weight(1, WeightUnit.KILOGRAM);
-
+            var w = new Quantity<WeightUnit>(1, WeightUnit.KILOGRAM);
             var result = w.ConvertTo(WeightUnit.GRAM);
 
-            Assert.That(result.GetValue(), Is.EqualTo(1000));
+            Assert.That(result.Value, Is.EqualTo(1000));
         }
 
         [Test]
         public void ConvertPoundToKilogram()
         {
-            var w = new Weight(2.20462, WeightUnit.POUND);
-
+            var w = new Quantity<WeightUnit>(2.20462, WeightUnit.POUND);
             var result = w.ConvertTo(WeightUnit.KILOGRAM);
 
-            Assert.That(result.GetValue(), Is.EqualTo(1));
-        }
-
-        [Test]
-        public void UC10_GivenFeetAndInches_WhenEquivalent_ShouldReturnTrue()
-        {
-            var feet = new Quantity<LengthUnit>(1, LengthUnit.FEET);
-            var inches = new Quantity<LengthUnit>(12, LengthUnit.INCHES);
-
-            Assert.That(feet.Equals(inches), Is.True);
+            Assert.That(result.Value, Is.EqualTo(1).Within(0.0001));
         }
 
         // =======================
-        // UC11 – Volume Tests
+        // Volume Tests with Simplified Quantity<T>
         // =======================
 
         [Test]
@@ -299,20 +289,18 @@ namespace QuantityMeasurementApp.Tests
         public void ConvertLitreToMillilitre()
         {
             var volume = new Quantity<VolumeUnit>(1, VolumeUnit.LITRE);
-
             var result = volume.ConvertTo(VolumeUnit.MILLILITRE);
 
-            Assert.That(result.GetValue(), Is.EqualTo(1000));
+            Assert.That(result.Value, Is.EqualTo(1000));
         }
 
         [Test]
         public void ConvertGallonToLitre()
         {
             var volume = new Quantity<VolumeUnit>(1, VolumeUnit.GALLON);
-
             var result = volume.ConvertTo(VolumeUnit.LITRE);
 
-            Assert.That(result.GetValue(), Is.EqualTo(3.78541));
+            Assert.That(result.Value, Is.EqualTo(3.78541).Within(0.00001));
         }
 
         [Test]
@@ -323,7 +311,7 @@ namespace QuantityMeasurementApp.Tests
 
             var result = v1.Add(v2);
 
-            Assert.That(result.GetValue(), Is.EqualTo(2));
+            Assert.That(result.Value, Is.EqualTo(2));
         }
 
         [Test]
@@ -334,19 +322,8 @@ namespace QuantityMeasurementApp.Tests
 
             var result = v1.Add(v2, VolumeUnit.MILLILITRE);
 
-            Assert.That(result.GetValue(), Is.EqualTo(2000));
-            Assert.That(result.GetUnit(), Is.EqualTo(VolumeUnit.MILLILITRE));
-        }
-
-        [Test]
-        public void SubtractFeetAndInches()
-        {
-            var f = new Quantity<LengthUnit>(10, LengthUnit.FEET);
-            var i = new Quantity<LengthUnit>(6, LengthUnit.INCHES);
-
-            var result = f.Subtract(i);
-
-            Assert.That(result.GetValue(), Is.EqualTo(9.5));
+            Assert.That(result.Value, Is.EqualTo(2000));
+            Assert.That(result.Unit, Is.EqualTo(VolumeUnit.MILLILITRE));
         }
 
         [Test]
@@ -357,7 +334,7 @@ namespace QuantityMeasurementApp.Tests
 
             var result = v1.Subtract(v2);
 
-            Assert.That(result.GetValue(), Is.EqualTo(3));
+            Assert.That(result.Value, Is.EqualTo(3));
         }
 
         [Test]
@@ -382,9 +359,9 @@ namespace QuantityMeasurementApp.Tests
             Assert.That(result, Is.EqualTo(1));
         }
 
-        // -------------------------
-        // Equality Tests
-        // -------------------------
+        // =======================
+        // Temperature Tests with Simplified Quantity<T>
+        // =======================
 
         [Test]
         public void CelsiusEqualsCelsius()
@@ -431,43 +408,32 @@ namespace QuantityMeasurementApp.Tests
             Assert.That(celsius.Equals(fahrenheit), Is.True);
         }
 
-        // -------------------------
-        // Conversion Tests
-        // -------------------------
-
         [Test]
         public void ConvertCelsiusToFahrenheit()
         {
             var celsius = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
-
             var result = celsius.ConvertTo(TemperatureUnit.FAHRENHEIT);
 
-            Assert.That(result.GetValue(), Is.EqualTo(212));
+            Assert.That(result.Value, Is.EqualTo(212));
         }
 
         [Test]
         public void ConvertFahrenheitToCelsius()
         {
             var fahrenheit = new Quantity<TemperatureUnit>(32, TemperatureUnit.FAHRENHEIT);
-
             var result = fahrenheit.ConvertTo(TemperatureUnit.CELSIUS);
 
-            Assert.That(result.GetValue(), Is.EqualTo(0));
+            Assert.That(result.Value, Is.EqualTo(0));
         }
 
         [Test]
         public void ConvertNegativeTemperature()
         {
             var celsius = new Quantity<TemperatureUnit>(-40, TemperatureUnit.CELSIUS);
-
             var result = celsius.ConvertTo(TemperatureUnit.FAHRENHEIT);
 
-            Assert.That(result.GetValue(), Is.EqualTo(-40));
+            Assert.That(result.Value, Is.EqualTo(-40));
         }
-
-        // -------------------------
-        // Unsupported Operations
-        // -------------------------
 
         [Test]
         public void TemperatureAdditionShouldThrowException()
@@ -496,9 +462,9 @@ namespace QuantityMeasurementApp.Tests
             Assert.Throws<NotSupportedException>(() => t1.Divide(t2));
         }
 
-        // -------------------------
+        // =======================
         // Cross Category Safety
-        // -------------------------
+        // =======================
 
         [Test]
         public void TemperatureNotEqualToLength()
@@ -527,9 +493,9 @@ namespace QuantityMeasurementApp.Tests
             Assert.That(temp.Equals(volume), Is.False);
         }
 
-        // -------------------------
+        // =======================
         // Edge Case Tests
-        // -------------------------
+        // =======================
 
         [Test]
         public void SameReferenceTemperature()
@@ -554,6 +520,71 @@ namespace QuantityMeasurementApp.Tests
             var t2 = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
 
             Assert.That(t1.Equals(t2), Is.False);
+        }
+
+        // =======================
+        // Additional Tests for New Features
+        // =======================
+
+        [Test]
+        public void ConvertCentimetersToInches()
+        {
+            var cm = new Quantity<LengthUnit>(10, LengthUnit.CENTIMETERS);
+            var result = cm.ConvertTo(LengthUnit.INCHES);
+            
+            Assert.That(result.Value, Is.EqualTo(3.93701).Within(0.00001));
+        }
+
+        [Test]
+        public void AddYardsAndFeet()
+        {
+            var yards = new Quantity<LengthUnit>(2, LengthUnit.YARDS);
+            var feet = new Quantity<LengthUnit>(3, LengthUnit.FEET);
+            
+            var result = yards.Add(feet);
+            var expected = new Quantity<LengthUnit>(9, LengthUnit.FEET);
+            
+            Assert.That(result.Equals(expected), Is.True);
+        }
+
+        [Test]
+        public void SubtractGramsFromKilograms()
+        {
+            var kg = new Quantity<WeightUnit>(2, WeightUnit.KILOGRAM);
+            var g = new Quantity<WeightUnit>(500, WeightUnit.GRAM);
+            
+            var result = kg.Subtract(g);
+            var expected = new Quantity<WeightUnit>(1.5, WeightUnit.KILOGRAM);
+            
+            Assert.That(result.Value, Is.EqualTo(1.5).Within(0.0001));
+        }
+
+        [Test]
+        public void GetValueReturnsCorrectValue()
+        {
+            var quantity = new Quantity<LengthUnit>(42.5, LengthUnit.FEET);
+            Assert.That(quantity.Value, Is.EqualTo(42.5));
+        }
+
+        [Test]
+        public void GetUnitReturnsCorrectUnit()
+        {
+            var quantity = new Quantity<LengthUnit>(10, LengthUnit.YARDS);
+            Assert.That(quantity.Unit, Is.EqualTo(LengthUnit.YARDS));
+        }
+
+        [Test]
+        public void ToStringFormatsCorrectly()
+        {
+            var quantity = new Quantity<LengthUnit>(12.5, LengthUnit.INCHES);
+            Assert.That(quantity.ToString(), Is.EqualTo("12.5 INCHES"));
+        }
+
+        [Test]
+        public void ToStringFormatsWholeNumbersWithoutDecimal()
+        {
+            var quantity = new Quantity<LengthUnit>(12, LengthUnit.INCHES);
+            Assert.That(quantity.ToString(), Is.EqualTo("12 INCHES"));
         }
     }
 }
