@@ -6,18 +6,32 @@ using ModelLayer.Enums;
 using QuantityMeasurementApp.Controllers;
 using RepositoryLayer.Implementations;
 using RepositoryLayer.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient; 
+using System;
+using System.IO;
 
 namespace QuantityMeasurementApp
 {
     internal class Program
     {
+        private static IConfiguration? _configuration;  
         private static IQuantityMeasurementRepository? _repository;
         private static IQuantityMeasurementService? _service;
         private static QuantityMeasurementController? _controller;
 
         static void Main(string[] args)
         {
+            // Initialize configuration first
+            InitializeConfiguration();
+            
+            // Testing database connection
+            TestDatabaseConnection();
+            
+            // Initialize dependencies
             InitializeDependencies();
+
+            TestDatabaseSave();
             
             bool exit = false;
             
@@ -64,17 +78,141 @@ namespace QuantityMeasurementApp
             }
         }
 
+        /// <summary>
+        /// UC16: Load configuration from appsettings.json
+        /// </summary>
+        private static void InitializeConfiguration()
+        {
+            try
+            {
+                _configuration = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .AddEnvironmentVariables()
+                    .Build();
+                
+                Console.WriteLine("Configuration loaded successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading configuration: {ex.Message}");
+                Console.WriteLine("Using default configuration (Cache Repository)");
+                
+                // Fallback to default configuration if file doesn't exist
+                var configBuilder = new ConfigurationBuilder();
+                _configuration = configBuilder.Build();
+            }
+        }
+
         private static void InitializeDependencies()
         {
-            _repository = QuantityMeasurementCacheRepository.Instance;
+            // Use the already loaded configuration
+            _repository = CreateRepository(_configuration);
             _service = new QuantityMeasurementService(_repository);
             _controller = new QuantityMeasurementController(_service);
+            
+            // Log which repository is being used
+            Console.WriteLine($"Using repository: {_repository.GetType().Name}");
+        }
+
+        private static IQuantityMeasurementRepository CreateRepository(IConfiguration config)
+        {
+            var repoType = config["RepositoryType"];
+            
+            // Try to create database repository if configured
+            if (repoType?.Equals("Database", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                try
+                {
+                    return new QuantityMeasurementDatabaseRepository(config);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to create database repository: {ex.Message}");
+                    Console.WriteLine("Falling back to cache repository.");
+                    return QuantityMeasurementCacheRepository.Instance;
+                }
+            }
+            
+            // Default to cache repository
+            return QuantityMeasurementCacheRepository.Instance;
+        }
+
+        /// <summary>
+        /// UC16: Test database connection
+        /// </summary>
+        private static void TestDatabaseConnection()
+        {
+            try
+            {
+                // Check if configuration exists and has connection string
+                if (_configuration == null)
+                {
+                    Console.WriteLine("Configuration not loaded, skipping database test.");
+                    return;
+                }
+                
+                var connectionString = _configuration.GetConnectionString("DefaultConnection");
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    Console.WriteLine("No database connection string found, skipping database test.");
+                    return;
+                }
+                
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                Console.WriteLine("Database connection successful!");
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database connection test: {ex.Message}");
+                Console.WriteLine("  The application will continue but database operations may fail.");
+            }
+        }
+
+        private static void TestDatabaseSave()
+        {
+            try
+            {
+                Console.WriteLine("\n=== TESTING DATABASE SAVE ===");
+                
+                // Create a test record
+                var testRequest = new MeasurementRequest 
+                { 
+                    Value = 999, 
+                    Unit = "TEST", 
+                    Type = "TEST" 
+                };
+                
+                var testRecord = new MeasurementRecord("TEST_OPERATION", testRequest, testRequest);
+                
+                // Save it
+                _repository?.Save(testRecord);
+                
+                Console.WriteLine("Test record saved successfully!");
+                
+                // Retrieve all records
+                var allRecords = _repository?.GetAll();
+                Console.WriteLine($"Total records in database: {allRecords?.Count() ?? 0}");
+                
+                // Show the last record
+                var lastRecord = allRecords?.FirstOrDefault();
+                if (lastRecord != null)
+                {
+                    Console.WriteLine($"Last record - Operation: {lastRecord.Operation}, Timestamp: {lastRecord.Timestamp}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Test failed: {ex.Message}");
+            }
         }
 
         static void DisplayHeader()
         {
             Console.WriteLine("========================================");
-            Console.WriteLine("   QUANTITY MEASUREMENT APP");
+            Console.WriteLine("   QUANTITY MEASUREMENT APP (UC16)");
             Console.WriteLine("========================================");
             Console.WriteLine();
         }
