@@ -1,3 +1,7 @@
+# User secrets
+appsettings.Development.json
+appsettings.Production.json
+
 # Build folders
 bin/
 obj/
