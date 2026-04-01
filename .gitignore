@@ -1,6 +1,7 @@
 # User secrets
 appsettings.Development.json
 appsettings.Production.json
+appsettings.json
 
 # Build folders
 bin/
