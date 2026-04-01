@@ -20,7 +20,7 @@ namespace RepositoryLayer.Implementations
             Console.WriteLine($"Database Repository initialized with connection: {_connectionString}");
         }
 
-        public void Save(MeasurementRecord record)
+         public void Save(MeasurementRecord record)
         {
             try
             {

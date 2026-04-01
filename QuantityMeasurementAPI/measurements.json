@@ -1,0 +1,23 @@
+[
+  {
+    "Timestamp": "2026-03-31T12:19:35.2606322+05:30",
+    "Operation": "COMPARE",
+    "Operand1": {
+      "Value": 12,
+      "Unit": "INCHES",
+      "Type": "LENGTH"
+    },
+    "Operand2": {
+      "Value": 1,
+      "Unit": "FEET",
+      "Type": "LENGTH"
+    },
+    "Result": {
+      "Value": 1,
+      "Unit": "BOOLEAN",
+      "Type": "RESULT"
+    },
+    "HasError": false,
+    "ErrorMessage": null
+  }
+]

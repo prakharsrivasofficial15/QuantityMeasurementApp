@@ -36,6 +36,3 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
-
-# .gitignore file
-QuantityMeasurementAPI/
