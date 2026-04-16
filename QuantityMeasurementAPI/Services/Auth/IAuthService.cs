@@ -1,7 +1,8 @@
-using QuantityMeasurementAPI.DTOs;
-using QuantityMeasurementAPI.Models;
+using QuantityMeasurementAPI.DTOs.Auth;
+using QuantityMeasurementAPI.DTOs.User;
+using QuantityMeasurementAPI.Entities;
 
-namespace QuantityMeasurementAPI.Services
+namespace QuantityMeasurementAPI.Services.Auth
 {
     public interface IAuthService
     {

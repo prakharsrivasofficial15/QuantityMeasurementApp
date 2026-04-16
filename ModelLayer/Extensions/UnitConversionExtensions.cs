@@ -67,7 +67,7 @@ namespace ModelLayer.Extensions
             return unit switch
             {
                 TemperatureUnit.CELSIUS => value,
-                TemperatureUnit.FAHRENHEIT => (value - 32) * 5 / 9,
+                TemperatureUnit.FAHRENHEIT => (value - 32) * 5.0 / 9.0,
                 _ => throw new ArgumentException("Invalid temperature unit")
             };
         }

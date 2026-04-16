@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using QuantityMeasurementAPI.Models;
+using QuantityMeasurementAPI.Entities;
 
 namespace QuantityMeasurementAPI.Data
 {
@@ -13,6 +13,7 @@ namespace QuantityMeasurementAPI.Data
         // DbSets for our entities
         public DbSet<User> Users { get; set; }
         public DbSet<MeasurementRecord> MeasurementRecords { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,6 +40,19 @@ namespace QuantityMeasurementAPI.Data
                 entity.Property(e => e.Timestamp).HasDefaultValueSql("GETUTCDATE()");
                 entity.HasIndex(e => e.Operation);
                 entity.HasIndex(e => e.Timestamp);
+            });
+
+            // Configure RefreshToken table
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Token).IsUnique();
+                entity.Property(e => e.Token).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

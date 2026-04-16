@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using QuantityMeasurementAPI.DTOs;
-using QuantityMeasurementAPI.Services;
+using QuantityMeasurementAPI.DTOs.Auth;
+using QuantityMeasurementAPI.Services.Auth;
 using Microsoft.Extensions.Configuration;
 
 namespace QuantityMeasurementAPI.Controllers

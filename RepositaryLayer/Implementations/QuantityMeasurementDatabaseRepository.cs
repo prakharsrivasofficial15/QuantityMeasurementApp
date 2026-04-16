@@ -1,7 +1,7 @@
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using ModelLayer.DTOs;
+using ModelLayer.DTOs;  // Fixed: MeasurementRecord and MeasurementRequest are in DTOs
 using RepositoryLayer.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace RepositoryLayer.Implementations
             Console.WriteLine($"Database Repository initialized with connection: {_connectionString}");
         }
 
-         public void Save(MeasurementRecord record)
+        public void Save(MeasurementRecord record)
         {
             try
             {

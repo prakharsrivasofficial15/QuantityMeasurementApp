@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace QuantityMeasurementAPI.DTOs
+namespace QuantityMeasurementAPI.DTOs.Auth
 {
     public class GoogleUserInfo
     {

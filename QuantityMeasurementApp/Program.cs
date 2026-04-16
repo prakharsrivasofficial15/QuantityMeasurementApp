@@ -1,4 +1,3 @@
-﻿
 ﻿using BusinessLayer.Services;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Exceptions;
@@ -24,6 +23,7 @@ namespace QuantityMeasurementApp
         static void Main(string[] args)
         {
             // Initialize configuration first
+            // pu
             InitializeConfiguration();
             
             // Testing database connection

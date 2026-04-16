@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using QuantityMeasurementAPI.DTOs;
-using QuantityMeasurementAPI.Services;
+using QuantityMeasurementAPI.DTOs.Auth;
+using QuantityMeasurementAPI.DTOs.User;
+using QuantityMeasurementAPI.Services.Auth;
 using System.Security.Claims;
 
 namespace QuantityMeasurementAPI.Controllers
@@ -57,12 +58,10 @@ namespace QuantityMeasurementAPI.Controllers
                 return Unauthorized();
 
             var user = await _authService.UpdateUser(int.Parse(userId), request);
-            if (user == null)
-                return BadRequest(new { message = "Update failed. Username or email may already exist." });
 
             return Ok(new
             {
-                user.Username,
+                user!.Username,
                 user.Email,
                 message = "Profile updated successfully"
             });

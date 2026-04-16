@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace QuantityMeasurementAPI.Models
+namespace QuantityMeasurementAPI.Entities
 {
     public class User
     {

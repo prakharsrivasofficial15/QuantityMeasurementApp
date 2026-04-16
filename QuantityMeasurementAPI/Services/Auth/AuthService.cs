@@ -6,10 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using QuantityMeasurementAPI.Data;
-using QuantityMeasurementAPI.DTOs;
-using QuantityMeasurementAPI.Models;
+using QuantityMeasurementAPI.DTOs.Auth;
+using QuantityMeasurementAPI.DTOs.User;
+using QuantityMeasurementAPI.Entities;
+using QuantityMeasurementAPI.Exceptions;
 
-namespace QuantityMeasurementAPI.Services
+namespace QuantityMeasurementAPI.Services.Auth
 {
     public class AuthService : IAuthService
     {
@@ -218,31 +220,30 @@ namespace QuantityMeasurementAPI.Services
             var user = await _context.Users.FindAsync(id);
             if (user == null) return null;
 
-            // Update username
             if (!string.IsNullOrWhiteSpace(request.Username))
             {
                 var existing = await _context.Users
                     .AnyAsync(u => u.Username == request.Username && u.Id != id);
-                if (existing) return null;
+                if (existing) 
+                    throw new ValidationException("Username is already taken.");
                 user.Username = request.Username;
             }
 
-            // Update email
             if (!string.IsNullOrWhiteSpace(request.Email))
             {
                 var existing = await _context.Users
                     .AnyAsync(u => u.Email == request.Email && u.Id != id);
-                if (existing) return null;
+                if (existing) 
+                    throw new ValidationException("Email is already in use.");
                 user.Email = request.Email;
             }
 
-            // Update password only for non-Google users
             if (!user.IsGoogleUser && !string.IsNullOrWhiteSpace(request.NewPassword))
             {
                 if (string.IsNullOrWhiteSpace(request.CurrentPassword) ||
                     !VerifyPassword(request.CurrentPassword, user.PasswordHash ?? "", user.Salt ?? ""))
-                    return null;
-                    
+                    throw new ValidationException("Current password is incorrect.");
+
                 var salt = GenerateSalt();
                 user.PasswordHash = HashPassword(request.NewPassword, salt);
                 user.Salt = salt;

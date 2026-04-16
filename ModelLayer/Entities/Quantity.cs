@@ -3,7 +3,6 @@ using ModelLayer.Extensions;
 
 namespace ModelLayer.Entities
 {
-    // Now works directly with enums instead of IMeasurable wrappers
     public class Quantity<TEnum> where TEnum : Enum
     {
         private readonly double _value;
@@ -24,25 +23,29 @@ namespace ModelLayer.Entities
         public double Value => _value;
         public TEnum Unit => _unit;
 
-        // Convert to base unit (Celsius for temp, grams for weight, etc.)
-        private double ConvertToBase() => _unit switch
+        private double ConvertToBase()
         {
-            LengthUnit l => l.ConvertToBaseUnit(_value),
-            WeightUnit w => w.ConvertToBaseUnit(_value),
-            VolumeUnit v => v.ConvertToBaseUnit(_value),
-            TemperatureUnit t => t.ConvertToBaseUnit(_value),
-            _ => throw new NotSupportedException($"Unsupported unit type: {typeof(TEnum)}")
-        };
+            return _unit switch
+            {
+                LengthUnit l => l.ConvertToBaseUnit(_value),
+                WeightUnit w => w.ConvertToBaseUnit(_value),
+                VolumeUnit v => v.ConvertToBaseUnit(_value),
+                TemperatureUnit t => t.ConvertToBaseUnit(_value),
+                _ => throw new NotSupportedException($"Unsupported unit type: {typeof(TEnum)}")
+            };
+        }
 
-        // Convert from base unit
-        private double ConvertFromBase(double baseValue, TEnum targetUnit) => targetUnit switch
+        private double ConvertFromBase(double baseValue, TEnum targetUnit)
         {
-            LengthUnit l => l.ConvertFromBaseUnit(baseValue),
-            WeightUnit w => w.ConvertFromBaseUnit(baseValue),
-            VolumeUnit v => v.ConvertFromBaseUnit(baseValue),
-            TemperatureUnit t => t.ConvertFromBaseUnit(baseValue),
-            _ => throw new NotSupportedException($"Unsupported unit type: {typeof(TEnum)}")
-        };
+            return targetUnit switch
+            {
+                LengthUnit l => l.ConvertFromBaseUnit(baseValue),
+                WeightUnit w => w.ConvertFromBaseUnit(baseValue),
+                VolumeUnit v => v.ConvertFromBaseUnit(baseValue),
+                TemperatureUnit t => t.ConvertFromBaseUnit(baseValue),
+                _ => throw new NotSupportedException($"Unsupported unit type: {typeof(TEnum)}")
+            };
+        }
 
         public Quantity<TEnum> ConvertTo(TEnum targetUnit)
         {
@@ -61,7 +64,6 @@ namespace ModelLayer.Entities
         {
             ValidateArithmetic(other);
             
-            // Temperature doesn't support arithmetic
             if (_unit is TemperatureUnit)
                 throw new NotSupportedException("Temperature measurements cannot be added");
             
@@ -111,16 +113,13 @@ namespace ModelLayer.Entities
             if (other == null)
                 throw new ArgumentNullException(nameof(other));
                 
-            if (_unit.GetType() != other._unit.GetType())
-                throw new ArgumentException($"Cannot operate on different unit types");
+            // Since TEnum is constrained to Enum, both must be of the exact same type
+            // The compiler already ensures this through the generic constraint
         }
 
         public override bool Equals(object? obj)
         {
             if (obj is not Quantity<TEnum> other)
-                return false;
-                
-            if (_unit.GetType() != other._unit.GetType())
                 return false;
                 
             return Math.Round(ConvertToBase(), 2) == Math.Round(other.ConvertToBase(), 2);

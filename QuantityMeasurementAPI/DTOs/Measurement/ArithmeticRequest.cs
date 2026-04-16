@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace QuantityMeasurementAPI.DTOs
+namespace QuantityMeasurementAPI.DTOs.Measurement
 {
     public class ArithmeticRequest
     {

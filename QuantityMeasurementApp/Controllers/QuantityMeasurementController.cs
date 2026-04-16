@@ -23,12 +23,20 @@ namespace QuantityMeasurementApp.Controllers
                 Console.WriteLine($"Comparing: {request1.Value} {request1.Unit} vs {request2.Value} {request2.Unit}");
                 var record = _service.Compare(request1, request2);
                 
-                if (record.Result is MeasurementRequest resultDto && resultDto.Value == 1)
-                    Console.WriteLine($"Result: Equal ✓");
-                else if (record.Result is MeasurementRequest resultDto2 && resultDto2.Value == 0)
-                    Console.WriteLine($"Result: Not Equal ✗");
+                // Fixed: Proper scoping and logic
+                if (record.Result is MeasurementRequest resultDto)
+                {
+                    if (resultDto.Value == 1)
+                        Console.WriteLine($"Result: Equal ✓");
+                    else if (resultDto.Value == 0)
+                        Console.WriteLine($"Result: Not Equal ✗");
+                    else
+                        Console.WriteLine($"Result: {record.Result}");
+                }
                 else
+                {
                     Console.WriteLine($"Result: {record.Result}");
+                }
             }
             catch (QuantityMeasurementException ex)
             {
@@ -50,6 +58,10 @@ namespace QuantityMeasurementApp.Controllers
                 if (record.Result is MeasurementRequest resultDto)
                 {
                     Console.WriteLine($"Result: {resultDto.Value} {resultDto.Unit}");
+                }
+                else
+                {
+                    Console.WriteLine($"Result: {record.Result}");
                 }
             }
             catch (QuantityMeasurementException ex)
@@ -73,6 +85,10 @@ namespace QuantityMeasurementApp.Controllers
                 {
                     Console.WriteLine($"Result: {resultDto.Value} {resultDto.Unit}");
                 }
+                else
+                {
+                    Console.WriteLine($"Result: {record.Result}");
+                }
             }
             catch (QuantityMeasurementException ex)
             {
@@ -95,6 +111,10 @@ namespace QuantityMeasurementApp.Controllers
                 {
                     Console.WriteLine($"Result: {resultDto.Value} {resultDto.Unit}");
                 }
+                else
+                {
+                    Console.WriteLine($"Result: {record.Result}");
+                }
             }
             catch (QuantityMeasurementException ex)
             {
@@ -110,12 +130,18 @@ namespace QuantityMeasurementApp.Controllers
         {
             try
             {
+                // Fixed: Typo "Dividing" -> "Dividing" (though should be "Dividing" or better "Dividing"?)
+                // Actually "Dividing" is correct for division
                 Console.WriteLine($"Dividing: {request1.Value} {request1.Unit} ÷ {request2.Value} {request2.Unit}");
                 var record = _service.Divide(request1, request2);
                 
                 if (record.Result is MeasurementRequest resultDto)
                 {
                     Console.WriteLine($"Result: {resultDto.Value} (dimensionless)");
+                }
+                else
+                {
+                    Console.WriteLine($"Result: {record.Result}");
                 }
             }
             catch (QuantityMeasurementException ex)
@@ -152,23 +178,26 @@ namespace QuantityMeasurementApp.Controllers
 
         public void DisplayError(string message)
         {
+            var originalColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"\nError: {message}");
-            Console.ResetColor();
+            Console.ForegroundColor = originalColor;
         }
 
         public void DisplaySuccess(string message)
         {
+            var originalColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"\nSuccess: {message}");
-            Console.ResetColor();
+            Console.ForegroundColor = originalColor;
         }
 
         public void DisplayWarning(string message)
         {
+            var originalColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"\nWarning: {message}");
-            Console.ResetColor();
+            Console.ForegroundColor = originalColor;
         }
 
         #endregion

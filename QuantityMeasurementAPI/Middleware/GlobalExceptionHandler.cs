@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Microsoft.Data.SqlClient;
-using QuantityMeasurementAPI.DTOs;
+using QuantityMeasurementAPI.DTOs.Common;
 using QuantityMeasurementAPI.Exceptions;
 
 namespace QuantityMeasurementAPI.Middleware

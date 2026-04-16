@@ -1,4 +1,4 @@
-namespace QuantityMeasurementAPI.Models
+namespace QuantityMeasurementAPI.Entities
 {
     public class MeasurementEvent
     {

@@ -1,4 +1,4 @@
-using ModelLayer.DTOs;
+using ModelLayer.DTOs;  // Fixed: MeasurementRecord is in DTOs
 using RepositoryLayer.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace RepositoryLayer.Implementations
     public sealed class QuantityMeasurementCacheRepository : IQuantityMeasurementRepository
     {
         private static readonly object _lock = new object();
-        private static QuantityMeasurementCacheRepository? _instance;
+        private static volatile QuantityMeasurementCacheRepository? _instance;
         private List<MeasurementRecord> _cache = new List<MeasurementRecord>();
         private readonly string _filePath = "measurements.json";
 
@@ -46,15 +46,15 @@ namespace RepositoryLayer.Implementations
             lock (_lock)
             {
                 _cache.Add(record);
-                SaveToDisk();
             }
+            SaveToDisk();
         }
 
         public IEnumerable<MeasurementRecord> GetAll()
         {
             lock (_lock)
             {
-                return _cache.ToList(); // Return a copy to avoid modification issues
+                return _cache.ToList();
             }
         }
 
@@ -63,9 +63,17 @@ namespace RepositoryLayer.Implementations
             lock (_lock)
             {
                 _cache.Clear();
-                if (File.Exists(_filePath))
+            }
+            
+            if (File.Exists(_filePath))
+            {
+                try
                 {
                     File.Delete(_filePath);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to delete file: {ex.Message}");
                 }
             }
         }
@@ -74,18 +82,23 @@ namespace RepositoryLayer.Implementations
         {
             try
             {
+                List<MeasurementRecord> cacheCopy;
+                lock (_lock)
+                {
+                    cacheCopy = _cache.ToList();
+                }
+                
                 var options = new JsonSerializerOptions 
                 { 
                     WriteIndented = true,
                     PropertyNameCaseInsensitive = true
                 };
                 
-                string jsonString = JsonSerializer.Serialize(_cache, options);
+                string jsonString = JsonSerializer.Serialize(cacheCopy, options);
                 File.WriteAllText(_filePath, jsonString);
             }
             catch (Exception ex)
             {
-                // Log error but don't throw - we don't want to crash the app if disk write fails
                 Console.WriteLine($"Warning: Failed to save to disk: {ex.Message}");
             }
         }
@@ -97,16 +110,16 @@ namespace RepositoryLayer.Implementations
 
             try
             {
-                lock (_lock)
+                string jsonString = File.ReadAllText(_filePath);
+                var options = new JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true 
+                };
+                
+                var loaded = JsonSerializer.Deserialize<List<MeasurementRecord>>(jsonString, options);
+                if (loaded != null)
                 {
-                    string jsonString = File.ReadAllText(_filePath);
-                    var options = new JsonSerializerOptions 
-                    { 
-                        PropertyNameCaseInsensitive = true 
-                    };
-                    
-                    var loaded = JsonSerializer.Deserialize<List<MeasurementRecord>>(jsonString, options);
-                    if (loaded != null)
+                    lock (_lock)
                     {
                         _cache = loaded;
                     }
@@ -114,9 +127,11 @@ namespace RepositoryLayer.Implementations
             }
             catch (Exception ex)
             {
-                // Log error but don't throw - start with empty cache if file is corrupted
                 Console.WriteLine($"Warning: Failed to load from disk: {ex.Message}");
-                _cache = new List<MeasurementRecord>();
+                lock (_lock)
+                {
+                    _cache = new List<MeasurementRecord>();
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-namespace QuantityMeasurementAPI.DTOs
+namespace QuantityMeasurementAPI.DTOs.Common
 {
     public class ErrorResponse
     {

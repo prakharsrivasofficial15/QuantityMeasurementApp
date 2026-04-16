@@ -6,6 +6,7 @@ using ModelLayer.Enums;
 using RepositoryLayer.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BusinessLayer.Services
 {
@@ -19,7 +20,7 @@ namespace BusinessLayer.Services
         }
 
         #region Public Methods
-
+        
         public MeasurementRecord Compare(MeasurementRequest request1, MeasurementRequest request2)
         {
             try
@@ -28,7 +29,6 @@ namespace BusinessLayer.Services
                 
                 bool isEqual = false;
                 
-                // Handle each measurement type separately to avoid dynamic issues
                 switch (request1.Type)
                 {
                     case "LENGTH":
@@ -60,7 +60,6 @@ namespace BusinessLayer.Services
                 }
                 
                 var resultDto = CreateScalarResult(isEqual ? 1 : 0, "BOOLEAN");
-                
                 var record = new MeasurementRecord("COMPARE", request1, request2, resultDto);
                 _repository.Save(record);
                 
@@ -68,7 +67,8 @@ namespace BusinessLayer.Services
             }
             catch (Exception ex) when (!(ex is QuantityMeasurementException))
             {
-                var errorRecord = new MeasurementRecord("COMPARE", request1, request2, ex.Message);
+                var errorResult = CreateErrorResult();
+                var errorRecord = new MeasurementRecord("COMPARE", request1, request2, errorResult);
                 _repository.Save(errorRecord);
                 throw new QuantityMeasurementException($"Comparison failed: {ex.Message}", ex);
             }
@@ -83,14 +83,15 @@ namespace BusinessLayer.Services
                 if (string.IsNullOrWhiteSpace(targetUnit))
                     throw new QuantityMeasurementException("Target unit cannot be null or empty");
                 
-                MeasurementRequest resultDto = null;
+                MeasurementRequest? resultDto = null;
                 
                 // Handle each measurement type separately
                 switch (request.Type)
                 {
                     case "LENGTH":
+                        if (!Enum.TryParse<LengthUnit>(targetUnit, out var targetLenUnit))
+                            throw new QuantityMeasurementException($"Invalid target unit '{targetUnit}' for LENGTH");
                         var lenQuantity = new Quantity<LengthUnit>(request.Value, Enum.Parse<LengthUnit>(request.Unit));
-                        var targetLenUnit = Enum.Parse<LengthUnit>(targetUnit);
                         var convertedLen = lenQuantity.ConvertTo(targetLenUnit);
                         resultDto = new MeasurementRequest
                         {
@@ -101,8 +102,9 @@ namespace BusinessLayer.Services
                         break;
                         
                     case "WEIGHT":
+                        if (!Enum.TryParse<WeightUnit>(targetUnit, out var targetWtUnit))
+                            throw new QuantityMeasurementException($"Invalid target unit '{targetUnit}' for WEIGHT");
                         var wtQuantity = new Quantity<WeightUnit>(request.Value, Enum.Parse<WeightUnit>(request.Unit));
-                        var targetWtUnit = Enum.Parse<WeightUnit>(targetUnit);
                         var convertedWt = wtQuantity.ConvertTo(targetWtUnit);
                         resultDto = new MeasurementRequest
                         {
@@ -113,8 +115,9 @@ namespace BusinessLayer.Services
                         break;
                         
                     case "VOLUME":
+                        if (!Enum.TryParse<VolumeUnit>(targetUnit, out var targetVolUnit))
+                            throw new QuantityMeasurementException($"Invalid target unit '{targetUnit}' for VOLUME");
                         var volQuantity = new Quantity<VolumeUnit>(request.Value, Enum.Parse<VolumeUnit>(request.Unit));
-                        var targetVolUnit = Enum.Parse<VolumeUnit>(targetUnit);
                         var convertedVol = volQuantity.ConvertTo(targetVolUnit);
                         resultDto = new MeasurementRequest
                         {
@@ -125,8 +128,9 @@ namespace BusinessLayer.Services
                         break;
                         
                     case "TEMPERATURE":
+                        if (!Enum.TryParse<TemperatureUnit>(targetUnit, out var targetTempUnit))
+                            throw new QuantityMeasurementException($"Invalid target unit '{targetUnit}' for TEMPERATURE");
                         var tempQuantity = new Quantity<TemperatureUnit>(request.Value, Enum.Parse<TemperatureUnit>(request.Unit));
-                        var targetTempUnit = Enum.Parse<TemperatureUnit>(targetUnit);
                         var convertedTemp = tempQuantity.ConvertTo(targetTempUnit);
                         resultDto = new MeasurementRequest
                         {
@@ -147,7 +151,8 @@ namespace BusinessLayer.Services
             }
             catch (Exception ex) when (!(ex is QuantityMeasurementException))
             {
-                var errorRecord = new MeasurementRecord("CONVERT", request, ex.Message);
+                var errorResult = CreateErrorResult();
+                var errorRecord = new MeasurementRecord("CONVERT", request, errorResult);
                 _repository.Save(errorRecord);
                 throw new QuantityMeasurementException($"Conversion failed: {ex.Message}", ex);
             }
@@ -189,18 +194,24 @@ namespace BusinessLayer.Services
                     case "LENGTH":
                         var len1 = new Quantity<LengthUnit>(request1.Value, Enum.Parse<LengthUnit>(request1.Unit));
                         var len2 = new Quantity<LengthUnit>(request2.Value, Enum.Parse<LengthUnit>(request2.Unit));
+                        if (Math.Abs(len2.Value) < 0.000001)
+                            throw new QuantityMeasurementException("Cannot divide by zero");
                         result = len1.Divide(len2);
                         break;
-                        
+
                     case "WEIGHT":
                         var wt1 = new Quantity<WeightUnit>(request1.Value, Enum.Parse<WeightUnit>(request1.Unit));
                         var wt2 = new Quantity<WeightUnit>(request2.Value, Enum.Parse<WeightUnit>(request2.Unit));
+                        if (Math.Abs(wt2.Value) < 0.000001)
+                            throw new QuantityMeasurementException("Cannot divide by zero");
                         result = wt1.Divide(wt2);
                         break;
-                        
+
                     case "VOLUME":
                         var vol1 = new Quantity<VolumeUnit>(request1.Value, Enum.Parse<VolumeUnit>(request1.Unit));
                         var vol2 = new Quantity<VolumeUnit>(request2.Value, Enum.Parse<VolumeUnit>(request2.Unit));
+                        if (Math.Abs(vol2.Value) < 0.000001)
+                            throw new QuantityMeasurementException("Cannot divide by zero");
                         result = vol1.Divide(vol2);
                         break;
                         
@@ -217,7 +228,8 @@ namespace BusinessLayer.Services
             }
             catch (Exception ex) when (!(ex is QuantityMeasurementException))
             {
-                var errorRecord = new MeasurementRecord("DIVIDE", request1, request2, ex.Message);
+                var errorResult = CreateErrorResult();
+                var errorRecord = new MeasurementRecord("DIVIDE", request1, request2, errorResult);
                 _repository.Save(errorRecord);
                 throw new QuantityMeasurementException($"Division failed: {ex.Message}", ex);
             }
@@ -225,7 +237,7 @@ namespace BusinessLayer.Services
 
         public IEnumerable<MeasurementRecord> GetHistory()
         {
-            return _repository.GetAll();
+            return _repository.GetAll() ?? Enumerable.Empty<MeasurementRecord>();
         }
 
         #endregion
@@ -291,7 +303,8 @@ namespace BusinessLayer.Services
             }
             catch (Exception ex) when (!(ex is QuantityMeasurementException))
             {
-                var errorRecord = new MeasurementRecord(operation, request1, request2, ex.Message);
+                var errorResult = CreateErrorResult();
+                var errorRecord = new MeasurementRecord(operation, request1, request2, errorResult);
                 _repository.Save(errorRecord);
                 throw new QuantityMeasurementException($"{operation} failed: {ex.Message}", ex);
             }
@@ -304,6 +317,17 @@ namespace BusinessLayer.Services
                 Value = Math.Round(value, 5),
                 Unit = unit,
                 Type = "RESULT"
+            };
+        }
+
+        // Helper method to create error result
+        private MeasurementRequest CreateErrorResult()
+        {
+            return new MeasurementRequest
+            {
+                Value = 0,
+                Unit = "ERROR",
+                Type = "ERROR",
             };
         }
 

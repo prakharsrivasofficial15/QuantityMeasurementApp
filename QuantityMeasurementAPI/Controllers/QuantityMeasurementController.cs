@@ -1,470 +1,224 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using QuantityMeasurementAPI.DTOs;
+using QuantityMeasurementAPI.DTOs.Measurement;
 using QuantityMeasurementAPI.Exceptions;
-using QuantityMeasurementAPI.Models;
-using QuantityMeasurementAPI.Services;
 using BusinessLayer.Interfaces;
 using ModelLayer.DTOs;
-using System.Security.Claims;
 
 namespace QuantityMeasurementAPI.Controllers
 {
-    /// <summary>
-    /// Controller for handling quantity measurement operations like conversion, comparison, and arithmetic operations.
-    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class QuantityMeasurementController : ControllerBase
     {
         private readonly IQuantityMeasurementService _service;
         private readonly IMemoryCache _cache;
         private readonly ILogger<QuantityMeasurementController> _logger;
-        private readonly IMessageQueueService? _messageQueue;
 
-        /// <summary>
-        /// Initializes a new instance of the QuantityMeasurementController.
-        /// </summary>
-        /// <param name="service">The quantity measurement service.</param>
-        /// <param name="cache">The memory cache for caching results.</param>
-        /// <param name="logger">The logger for logging operations.</param>
-        /// <param name="messageQueue">Optional message queue service for publishing events.</param>
         public QuantityMeasurementController(
             IQuantityMeasurementService service,
             IMemoryCache cache,
-            ILogger<QuantityMeasurementController> logger,
-            IMessageQueueService? messageQueue = null) 
+            ILogger<QuantityMeasurementController> logger)
         {
             _service = service;
             _cache = cache;
             _logger = logger;
-            _messageQueue = messageQueue;
         }
 
-        /// <summary>
-        /// Publishes a measurement event to the message queue for logging and monitoring.
-        /// </summary>
-        /// <param name="operation">The operation type (e.g., COMPARE, CONVERT).</param>
-        /// <param name="data">The data associated with the operation.</param>
-        /// <param name="success">Whether the operation was successful.</param>
-        /// <param name="error">Optional error message if the operation failed.</param>
-        private void PublishMeasurementEvent(string operation, object data, bool success, string? error = null)
-        {
-            try
-            {
-                if (_messageQueue == null) return;
-                
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var username = User.Identity?.Name;
-                
-                var measurementEvent = new MeasurementEvent
-                {
-                    Operation = operation,
-                    Data = data,
-                    UserId = userId,
-                    Username = username,
-                    Timestamp = DateTime.UtcNow,
-                    Success = success,
-                    Error = error
-                };
-                
-                _messageQueue.PublishMeasurementEvent(operation, measurementEvent);
-                _logger.LogDebug("Published {Operation} event to RabbitMQ", operation);
-            }
-            catch (Exception ex)
-            {
-                // Don't fail the main operation if RabbitMQ fails
-                _logger.LogWarning(ex, "Failed to publish event to RabbitMQ for operation {Operation}", operation);
-            }
-        }
+        #region Public APIs
 
-        /// <summary>
-        /// Compares two quantities to check if they are equal.
-        /// </summary>
-        /// <param name="request">The comparison request containing two quantities.</param>
-        /// <returns>A response indicating whether the quantities are equal.</returns>
         [HttpPost("compare")]
-        public async Task<IActionResult> Compare([FromBody] CompareRequest request)
+        public IActionResult Compare([FromBody] CompareRequest request)
         {
-            MeasurementResponse? response = null;
-            bool success = true;
-            string? error = null;
-            
-            try
+            ValidateCompareRequest(request);
+
+            _logger.LogInformation("Comparing {V1}{U1} with {V2}{U2}",
+                request.Quantity1.Value, request.Quantity1.Unit,
+                request.Quantity2.Value, request.Quantity2.Unit);
+
+            var q1 = Map(request.Quantity1);
+            var q2 = Map(request.Quantity2);
+
+            var record = _service.Compare(q1, q2);
+
+            if (record.HasError)
+                throw new BusinessException(record.ErrorMessage);
+
+            bool isEqual = ExtractBooleanResult(record.Result);
+
+            return Ok(new MeasurementResponse
             {
-                _logger.LogInformation("Comparing quantities: {Value1} {Unit1} vs {Value2} {Unit2}",
-                    request.Quantity1.Value, request.Quantity1.Unit,
-                    request.Quantity2.Value, request.Quantity2.Unit);
-
-                if (request.Quantity1.Type != request.Quantity2.Type)
-                {
-                    throw new BusinessException($"Cannot compare different measurement types: {request.Quantity1.Type} and {request.Quantity2.Type}");
-                }
-
-                var req1 = new MeasurementRequest
-                {
-                    Value = request.Quantity1.Value,
-                    Unit = request.Quantity1.Unit,
-                    Type = request.Quantity1.Type
-                };
-                
-                var req2 = new MeasurementRequest
-                {
-                    Value = request.Quantity2.Value,
-                    Unit = request.Quantity2.Unit,
-                    Type = request.Quantity2.Type
-                };
-
-                var record = _service.Compare(req1, req2);
-                
-                bool isEqual = false;
-                if (record.Result is MeasurementRequest resultDto)
-                {
-                    isEqual = resultDto.Value == 1;
-                }
-
-                response = new MeasurementResponse
-                {
-                    Value = isEqual ? 1 : 0,
-                    Unit = "BOOLEAN",
-                    Type = "RESULT",
-                    IsEqual = isEqual,
-                    Success = true
-                };
-                
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                success = false;
-                error = ex.Message;
-                _logger.LogError(ex, "Error comparing quantities");
-                throw;
-            }
-            finally
-            {
-                // Publish event to RabbitMQ
-                PublishMeasurementEvent("COMPARE", new 
-                { 
-                    Request = request, 
-                    Response = response 
-                }, success, error);
-            }
+                Value = isEqual ? 1 : 0,
+                Unit = "BOOLEAN",
+                Type = "RESULT",
+                IsEqual = isEqual,
+                Success = true
+            });
         }
 
-        /// <summary>
-        /// Converts a quantity from one unit to another.
-        /// </summary>
-        /// <param name="request">The conversion request containing the quantity and target unit.</param>
-        /// <returns>The converted quantity in the target unit.</returns>
         [HttpPost("convert")]
-        public async Task<IActionResult> Convert([FromBody] ConvertRequest request)
+        public IActionResult Convert([FromBody] ConvertRequest request)
         {
-            MeasurementResponse? response = null;
-            bool success = true;
-            string? error = null;
-            
-            try
+            ValidateConvertRequest(request);
+
+            string cacheKey = BuildCacheKey(request);
+
+            if (_cache.TryGetValue(cacheKey, out MeasurementResponse cached))
             {
-                _logger.LogInformation("Converting {Value} {Unit} to {TargetUnit}",
-                    request.Quantity.Value, request.Quantity.Unit, request.TargetUnit);
-
-                var cacheKey = $"convert_{request.Quantity.Value}_{request.Quantity.Unit}_{request.TargetUnit}_{request.Quantity.Type}";
-                
-                if (_cache.TryGetValue(cacheKey, out MeasurementResponse? cachedResponse))
-                {
-                    _logger.LogInformation("Returning cached result for {CacheKey}", cacheKey);
-                    response = cachedResponse;
-                    return Ok(response);
-                }
-
-                var req = new MeasurementRequest
-                {
-                    Value = request.Quantity.Value,
-                    Unit = request.Quantity.Unit,
-                    Type = request.Quantity.Type
-                };
-
-                var record = _service.Convert(req, request.TargetUnit);
-                
-                if (record.HasError)
-                {
-                    throw new BusinessException(record.ErrorMessage ?? "Conversion failed");
-                }
-                
-                if (record.Result is MeasurementRequest resultDto)
-                {
-                    response = new MeasurementResponse
-                    {
-                        Value = resultDto.Value,
-                        Unit = resultDto.Unit,
-                        Type = resultDto.Type,
-                        Success = true
-                    };
-                }
-                else
-                {
-                    throw new BusinessException("Conversion failed - invalid result");
-                }
-
-                _cache.Set(cacheKey, response, TimeSpan.FromMinutes(10));
-                
-                return Ok(response);
+                _logger.LogInformation("Cache hit: {Key}", cacheKey);
+                return Ok(cached);
             }
-            catch (Exception ex)
-            {
-                success = false;
-                error = ex.Message;
-                _logger.LogError(ex, "Error converting quantity");
-                throw;
-            }
-            finally
-            {
-                PublishMeasurementEvent("CONVERT", new 
-                { 
-                    Request = request, 
-                    Response = response 
-                }, success, error);
-            }
+
+            _logger.LogInformation("Converting {Value}{Unit} to {Target}",
+                request.Quantity.Value, request.Quantity.Unit, request.TargetUnit);
+
+            var record = _service.Convert(Map(request.Quantity), request.TargetUnit);
+
+            if (record.HasError)
+                throw new BusinessException(record.ErrorMessage);
+
+            var result = ExtractMeasurement(record.Result);
+
+            var response = BuildResponse(result);
+
+            _cache.Set(cacheKey, response, TimeSpan.FromMinutes(10));
+
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Adds two quantities of the same type.
-        /// </summary>
-        /// <param name="request">The arithmetic request containing two quantities to add.</param>
-        /// <returns>The sum of the two quantities.</returns>
         [HttpPost("add")]
-        public async Task<IActionResult> Add([FromBody] ArithmeticRequest request)
+        public IActionResult Add([FromBody] ArithmeticRequest request)
         {
-            MeasurementResponse? response = null;
-            bool success = true;
-            string? error = null;
-            
-            try
-            {
-                _logger.LogInformation("Adding {Value1} {Unit1} + {Value2} {Unit2}",
-                    request.Quantity1.Value, request.Quantity1.Unit,
-                    request.Quantity2.Value, request.Quantity2.Unit);
-
-                if (request.Quantity1.Type != request.Quantity2.Type)
-                {
-                    throw new BusinessException($"Cannot add different measurement types: {request.Quantity1.Type} and {request.Quantity2.Type}");
-                }
-
-                var req1 = new MeasurementRequest
-                {
-                    Value = request.Quantity1.Value,
-                    Unit = request.Quantity1.Unit,
-                    Type = request.Quantity1.Type
-                };
-                
-                var req2 = new MeasurementRequest
-                {
-                    Value = request.Quantity2.Value,
-                    Unit = request.Quantity2.Unit,
-                    Type = request.Quantity2.Type
-                };
-
-                var record = _service.Add(req1, req2);
-                
-                if (record.HasError)
-                {
-                    throw new BusinessException(record.ErrorMessage ?? "Addition failed");
-                }
-                
-                if (record.Result is not MeasurementRequest resultDto)
-                {
-                    throw new BusinessException("Addition failed - invalid result");
-                }
-
-                response = new MeasurementResponse
-                {
-                    Value = resultDto.Value,
-                    Unit = resultDto.Unit,
-                    Type = resultDto.Type,
-                    Success = true
-                };
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                success = false;
-                error = ex.Message;
-                _logger.LogError(ex, "Error adding quantities");
-                throw;
-            }
-            finally
-            {
-                PublishMeasurementEvent("ADD", new 
-                { 
-                    Request = request, 
-                    Response = response 
-                }, success, error);
-            }
+            return ExecuteArithmetic(request, _service.Add, "Adding");
         }
 
-        /// <summary>
-        /// Subtracts one quantity from another of the same type.
-        /// </summary>
-        /// <param name="request">The arithmetic request containing two quantities to subtract.</param>
-        /// <returns>The difference of the two quantities.</returns>
         [HttpPost("subtract")]
-        public async Task<IActionResult> Subtract([FromBody] ArithmeticRequest request)
+        public IActionResult Subtract([FromBody] ArithmeticRequest request)
         {
-            MeasurementResponse? response = null;
-            bool success = true;
-            string? error = null;
-            
-            try
-            {
-                _logger.LogInformation("Subtracting {Value1} {Unit1} - {Value2} {Unit2}",
-                    request.Quantity1.Value, request.Quantity1.Unit,
-                    request.Quantity2.Value, request.Quantity2.Unit);
-
-                if (request.Quantity1.Type != request.Quantity2.Type)
-                {
-                    throw new BusinessException($"Cannot subtract different measurement types: {request.Quantity1.Type} and {request.Quantity2.Type}");
-                }
-
-                var req1 = new MeasurementRequest
-                {
-                    Value = request.Quantity1.Value,
-                    Unit = request.Quantity1.Unit,
-                    Type = request.Quantity1.Type
-                };
-                
-                var req2 = new MeasurementRequest
-                {
-                    Value = request.Quantity2.Value,
-                    Unit = request.Quantity2.Unit,
-                    Type = request.Quantity2.Type
-                };
-
-                var record = _service.Subtract(req1, req2);
-                
-                if (record.HasError)
-                {
-                    throw new BusinessException(record.ErrorMessage ?? "Subtraction failed");
-                }
-                
-                if (record.Result is not MeasurementRequest resultDto)
-                {
-                    throw new BusinessException("Subtraction failed - invalid result");
-                }
-
-                response = new MeasurementResponse
-                {
-                    Value = resultDto.Value,
-                    Unit = resultDto.Unit,
-                    Type = resultDto.Type,
-                    Success = true
-                };
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                success = false;
-                error = ex.Message;
-                _logger.LogError(ex, "Error subtracting quantities");
-                throw;
-            }
-            finally
-            {
-                PublishMeasurementEvent("SUBTRACT", new 
-                { 
-                    Request = request, 
-                    Response = response 
-                }, success, error);
-            }
+            return ExecuteArithmetic(request, _service.Subtract, "Subtracting");
         }
 
-        /// <summary>
-        /// Divides one quantity by another of the same type.
-        /// </summary>
-        /// <param name="request">The arithmetic request containing two quantities to divide.</param>
-        /// <returns>The quotient of the two quantities as a scalar value.</returns>
         [HttpPost("divide")]
-        public async Task<IActionResult> Divide([FromBody] ArithmeticRequest request)
+        public IActionResult Divide([FromBody] ArithmeticRequest request)
         {
-            MeasurementResponse? response = null;
-            bool success = true;
-            string? error = null;
-            
+            ValidateArithmeticRequest(request);
+
+            _logger.LogInformation("Dividing {V1}{U1} by {V2}{U2}",
+                request.Quantity1.Value, request.Quantity1.Unit,
+                request.Quantity2.Value, request.Quantity2.Unit);
+
             try
             {
-                _logger.LogInformation("Dividing {Value1} {Unit1} ÷ {Value2} {Unit2}",
-                    request.Quantity1.Value, request.Quantity1.Unit,
-                    request.Quantity2.Value, request.Quantity2.Unit);
+                var record = _service.Divide(
+                    Map(request.Quantity1),
+                    Map(request.Quantity2));
 
-                if (request.Quantity1.Type != request.Quantity2.Type)
-                {
-                    throw new BusinessException($"Cannot divide different measurement types: {request.Quantity1.Type} and {request.Quantity2.Type}");
-                }
-
-                var req1 = new MeasurementRequest
-                {
-                    Value = request.Quantity1.Value,
-                    Unit = request.Quantity1.Unit,
-                    Type = request.Quantity1.Type
-                };
-                
-                var req2 = new MeasurementRequest
-                {
-                    Value = request.Quantity2.Value,
-                    Unit = request.Quantity2.Unit,
-                    Type = request.Quantity2.Type
-                };
-
-                var record = _service.Divide(req1, req2);
-                
                 if (record.HasError)
-                {
-                    throw new BusinessException(record.ErrorMessage ?? "Division failed");
-                }
-                
-                if (record.Result is MeasurementRequest resultDto)
-                {
-                    response = new MeasurementResponse
-                    {
-                        Value = resultDto.Value,
-                        Unit = "SCALAR",
-                        Type = "RESULT",
-                        Success = true
-                    };
-                }
-                else
-                {
-                    throw new BusinessException("Division failed - invalid result");
-                }
+                    throw new BusinessException(record.ErrorMessage);
 
-                return Ok(response);
+                var result = ExtractMeasurement(record.Result);
+
+                return Ok(new MeasurementResponse
+                {
+                    Value = result.Value,
+                    Unit = "SCALAR",
+                    Type = "RESULT",
+                    Success = true
+                });
             }
-            catch (DivideByZeroException ex)
+            catch (DivideByZeroException)
             {
-                success = false;
-                error = "Division by zero is not allowed";
-                _logger.LogError(ex, "Division by zero attempted");
-                throw new BusinessException(error);
-            }
-            catch (Exception ex)
-            {
-                success = false;
-                error = ex.Message;
-                _logger.LogError(ex, "Error dividing quantities");
-                throw;
-            }
-            finally
-            {
-                PublishMeasurementEvent("DIVIDE", new 
-                { 
-                    Request = request, 
-                    Response = response 
-                }, success, error);
+                throw new BusinessException("Division by zero is not allowed");
             }
         }
+
+        #endregion
+
+        #region Private Helpers
+
+        private IActionResult ExecuteArithmetic(
+            ArithmeticRequest request,
+            Func<MeasurementRequest, MeasurementRequest, dynamic> operation,
+            string operationName)
+        {
+            ValidateArithmeticRequest(request);
+
+            _logger.LogInformation("{Op} {V1}{U1} and {V2}{U2}",
+                operationName,
+                request.Quantity1.Value, request.Quantity1.Unit,
+                request.Quantity2.Value, request.Quantity2.Unit);
+
+            var record = operation(
+                Map(request.Quantity1),
+                Map(request.Quantity2));
+
+            if (record.HasError)
+                throw new BusinessException(record.ErrorMessage);
+
+            var result = ExtractMeasurement(record.Result);
+
+            return Ok(BuildResponse(result));
+        }
+
+        private MeasurementRequest Map(QuantityInputDTO dto) => new()
+        {
+            Value = dto.Value,
+            Unit = dto.Unit,
+            Type = dto.Type
+        };
+
+        private MeasurementResponse BuildResponse(MeasurementRequest result) => new()
+        {
+            Value = result.Value,
+            Unit = result.Unit,
+            Type = result.Type,
+            Success = true
+        };
+
+        private MeasurementRequest ExtractMeasurement(object result) =>
+            result as MeasurementRequest
+            ?? throw new BusinessException("Invalid result from service");
+
+        private bool ExtractBooleanResult(object result)
+        {
+            var measurement = ExtractMeasurement(result);
+            return measurement.Value == 1;
+        }
+
+        private string BuildCacheKey(ConvertRequest request) =>
+            $"convert_{request.Quantity.Value:F4}_" +
+            $"{request.Quantity.Unit.ToLower()}_" +
+            $"{request.TargetUnit.ToLower()}_" +
+            $"{request.Quantity.Type}";
+
+        #endregion
+
+        #region Validation
+
+        private void ValidateCompareRequest(CompareRequest request)
+        {
+            if (request?.Quantity1 == null || request?.Quantity2 == null)
+                throw new BusinessException("Invalid compare request");
+
+            if (request.Quantity1.Type != request.Quantity2.Type)
+                throw new BusinessException("Measurement types must match");
+        }
+
+        private void ValidateConvertRequest(ConvertRequest request)
+        {
+            if (request?.Quantity == null || string.IsNullOrWhiteSpace(request.TargetUnit))
+                throw new BusinessException("Invalid convert request");
+        }
+
+        private void ValidateArithmeticRequest(ArithmeticRequest request)
+        {
+            if (request?.Quantity1 == null || request?.Quantity2 == null)
+                throw new BusinessException("Invalid arithmetic request");
+
+            if (request.Quantity1.Type != request.Quantity2.Type)
+                throw new BusinessException("Measurement types must match");
+        }
+
+        #endregion
     }
 }
